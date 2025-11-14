@@ -1,0 +1,4 @@
+-keep class io.grpc.** { *; }
+-keep class com.google.protobuf.** { *; }
+-keep class ** extends com.google.protobuf.GeneratedMessageLite { *; }
+-dontwarn javax.annotation.**

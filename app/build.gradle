@@ -1,0 +1,75 @@
+plugins {
+    id 'com.android.application'
+    id 'com.google.protobuf' version '0.9.4'  // only if you keep .proto in this module
+}
+
+android {
+    namespace "com.example.chatauth"
+
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.example.chatauth"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    // Java 8+ features for gRPC/OkHttp
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
+    }
+
+    // (If you have Network Security Config for cleartext dev)
+    // packagingOptions to avoid duplicate META-INF (jjwt/jackson etc. if present)
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/INDEX.LIST', 'META-INF/DEPENDENCIES']
+        }
+    }
+}
+
+def grpcVersion = '1.64.0'
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
+    implementation 'androidx.core:core-ktx:1.13.1' // ok even if you write Java only
+
+    // gRPC Android client
+    implementation "io.grpc:grpc-okhttp:${grpcVersion}"
+    implementation "io.grpc:grpc-protobuf-lite:${grpcVersion}"
+    implementation "io.grpc:grpc-stub:${grpcVersion}"
+    implementation 'org.apache.tomcat:annotations-api:6.0.53'
+    implementation "androidx.security:security-crypto:1.1.0"
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+}
+
+// Only keep this protobuf block if your Android module owns the .proto.
+// If you’re copying generated Java from the server instead, remove this plugin & block.
+protobuf {
+    protoc { artifact = 'com.google.protobuf:protoc:3.25.3' }
+    plugins {
+        grpc { artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java { option 'lite' } // protobuf-lite for Android
+            }
+            task.plugins {
+                grpc { option 'lite' }
+            }
+        }
+    }
+}
