@@ -1,0 +1,29 @@
+{
+  "name": "chatroomwebview",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "cross-env DEBUG=true webpack serve --config webpack.config.js --mode development",
+    "build:debug": "cross-env DEBUG=true webpack --config webpack.config.js --mode development",
+    "build:release": "cross-env DEBUG=false webpack --config webpack.config.js --mode production",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "lit": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "cross-env": "^7.0.3",
+    "css-loader": "^6.10.0",
+    "css-minimizer-webpack-plugin": "^5.0.1",
+    "html-webpack-plugin": "^5.5.3",
+    "minify-html-literals": "^1.3.5",
+    "minify-html-literals-loader": "^1.1.1",
+    "mini-css-extract-plugin": "^2.9.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.4.5",
+    "webpack": "^5.90.3",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  }
+}

@@ -1,0 +1,14 @@
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "ink.bluballz.chat.v1";
+option java_outer_classname = "ChatProto";
+option optimize_for = LITE_RUNTIME;
+
+message ChatMessage {
+  string id        = 1;  // stringified DB id
+  string roomId    = 2;
+  string userId    = 3;
+  string userName  = 4;
+  string content   = 5;
+  int64  createdAt = 6;  // unix millis
+}
