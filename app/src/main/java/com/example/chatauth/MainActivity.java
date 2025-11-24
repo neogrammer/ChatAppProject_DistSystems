@@ -22,10 +22,11 @@ public class MainActivity extends AppCompatActivity {
         });
         EdgeToEdge.enable(this);
 
+        //todo do this after fragment navigation
         // add retained webview fragment
-        var frag_manager = getSupportFragmentManager();
-        if(frag_manager.findFragmentByTag(WebviewOwnerFragment.TAG) == null) {
-            frag_manager.beginTransaction().add(new WebviewOwnerFragment(), WebviewOwnerFragment.TAG).commit();
-        }
+//        var frag_manager = getSupportFragmentManager();
+//        if(frag_manager.findFragmentByTag(WebviewOwnerFragment.TAG) == null) {
+//            frag_manager.beginTransaction().add(new WebviewOwnerFragment(), WebviewOwnerFragment.TAG).commit();
+//        }
     }
 }

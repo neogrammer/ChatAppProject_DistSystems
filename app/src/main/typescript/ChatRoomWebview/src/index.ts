@@ -9,8 +9,8 @@ declare global {
   const AndroidBridge: IAndroidBridge;
 
   interface IAndroidBridge {
-    readonly userName: string;
-    readonly userId: string;
+    getUserName(): string;
+    getUserId(): string;
   }
 
   interface Window {
