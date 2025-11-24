@@ -8,6 +8,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.chatauth.fragment.chat.WebviewOwnerFragment;
+
 public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,5 +21,11 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
         EdgeToEdge.enable(this);
+
+        // add retained webview fragment
+        var frag_manager = getSupportFragmentManager();
+        if(frag_manager.findFragmentByTag(WebviewOwnerFragment.TAG) == null) {
+            frag_manager.beginTransaction().add(new WebviewOwnerFragment(), WebviewOwnerFragment.TAG).commit();
+        }
     }
 }

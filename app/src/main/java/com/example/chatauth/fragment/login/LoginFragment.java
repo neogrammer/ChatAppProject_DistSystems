@@ -1,4 +1,4 @@
-package com.example.chatauth;
+package com.example.chatauth.fragment.login;
 
 import android.os.Bundle;
 
@@ -7,9 +7,6 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 
 import com.example.chatauth.auth.AuthClientSample;
 import com.example.chatauth.auth.TokenStore;
@@ -17,6 +14,7 @@ import com.example.chatauth.databinding.FragmentLoginBinding;
 
 import java.util.concurrent.Executors;
 
+//todo move edit text contents to viewmodel so it survives process death
 public class LoginFragment extends Fragment {
     private final java.util.concurrent.Executor bg = Executors.newSingleThreadExecutor();
     private AuthClientSample client;
@@ -27,6 +25,8 @@ public class LoginFragment extends Fragment {
     // Point this at your server (LAN IP or public IP)
     private static final String HOST = "24.236.104.52"; // emulator-to-PC
     private static final int    PORT = 55101;      // your compose mapping (55101->50051)
+
+    public static final String TAG = "LoginFragment";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
