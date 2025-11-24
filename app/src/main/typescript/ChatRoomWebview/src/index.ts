@@ -13,6 +13,8 @@ declare global {
   interface IAndroidBridge {
     getUserName(): string;
     getUserId(): string;
+
+    setLoaded(): void;
   }
 
   interface Window {
@@ -36,24 +38,28 @@ if(DEBUG) {
   }
 }
 
-window['WebviewController'] = document.querySelector('webview-controller') as IWebviewController;
-window["WebviewControllerDecoder"] = {
-  toByteArray(b64: string) {
-    const bin = atob(b64);
-    const len = bin.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = bin.charCodeAt(i);
-    }
-    return bytes;
-  },
-  decodeChatMessage(b64: string) {
-    return ChatMessage.decode(this.toByteArray(b64));
-  },
-  decodeChatRoom(b64) {
-    return ChatRoom.decode(this.toByteArray(b64));
-  },
-}
+customElements.whenDefined('webview-controller').then(() => {
+  window['WebviewController'] = document.querySelector('webview-controller') as IWebviewController;
+  window["WebviewControllerDecoder"] = {
+    toByteArray(b64: string) {
+      const bin = atob(b64);
+      const len = bin.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = bin.charCodeAt(i);
+      }
+      return bytes;
+    },
+    decodeChatMessage(b64: string) {
+      return ChatMessage.decode(this.toByteArray(b64));
+    },
+    decodeChatRoom(b64) {
+      return ChatRoom.decode(this.toByteArray(b64));
+    },
+  }
+  AndroidBridge.setLoaded();
+})
+
 
 // const controller = document.querySelector('webview-controller');
 // controller!.addRoom({id: "0", roomName: "Test Room"});

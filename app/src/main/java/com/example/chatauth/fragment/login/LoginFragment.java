@@ -2,15 +2,20 @@ package com.example.chatauth.fragment.login;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.chatauth.R;
 import com.example.chatauth.auth.AuthClientSample;
 import com.example.chatauth.auth.TokenStore;
 import com.example.chatauth.databinding.FragmentLoginBinding;
+import com.example.chatauth.fragment.chat.ChatWebviewFragment;
 import com.example.chatauth.fragment.loading.LoadingDialogFragment;
 
 import java.util.concurrent.Executors;
@@ -66,5 +71,15 @@ public class LoginFragment extends Fragment {
         });
 
         return binding.getRoot();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        var nc = NavHostFragment.findNavController(this);
+        var args = new ChatWebviewFragment.Arguments("0", "TestUser");
+        var bundle = new Bundle();
+        bundle.putParcelable("args", args);
+        nc.navigate(R.id.action_loginFragment_to_chatWebviewFragment, bundle);
     }
 }
