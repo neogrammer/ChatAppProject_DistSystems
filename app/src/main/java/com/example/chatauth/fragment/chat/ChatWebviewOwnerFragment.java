@@ -76,8 +76,9 @@ public class ChatWebviewOwnerFragment extends Fragment {
         return null;
     }
 
+    // executes callback on the ui thread with the webview after its done loading
     public void withLoadedWebview(WithWebviewCallback callback) {
-        if(bridge.getLoaded()) callback.execute(webview);
+        if(bridge.getLoaded()) bridge.handler.post(() -> callback.execute(webview));
         else pending_callbacks.add(callback);
     }
 
@@ -125,6 +126,6 @@ public class ChatWebviewOwnerFragment extends Fragment {
 
         public boolean getLoaded() { return loaded; }
 
-        private final Handler handler = new Handler(Looper.getMainLooper());
+        public final Handler handler = new Handler(Looper.getMainLooper());
     }
 }

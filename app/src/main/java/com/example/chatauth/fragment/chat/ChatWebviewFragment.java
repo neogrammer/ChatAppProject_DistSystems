@@ -30,7 +30,6 @@ import java.util.Objects;
 import ink.bluballz.chat.v1.ChatMessage;
 import ink.bluballz.chat.v1.ChatRoom;
 
-//todo ensureLoaded
 //todo onPostMessage
 public class ChatWebviewFragment extends Fragment implements IWebviewController {
     @Override
