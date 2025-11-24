@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option csharp_namespace = "_3420_Chat_Service";
+
+package chat;
+
+message ChatMessage {
+  string id        = 1;  // stringified DB id
+  string roomId    = 2;
+  string userId    = 3;
+  string userName  = 4;
+  string content   = 5;
+  int64  createdAt = 6;  // unix millis
+}
+
+message SendMessageResponse {
+  bool success = 1;
+}
+
+service ChatService {
+  rpc SendMessage(ChatMessage) returns (SendMessageResponse);
+}

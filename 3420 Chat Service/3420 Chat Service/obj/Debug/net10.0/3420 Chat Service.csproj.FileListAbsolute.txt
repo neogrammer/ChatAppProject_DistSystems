@@ -1,0 +1,44 @@
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\3420 Chat Service.csproj.AssemblyReference.cache
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\rpswa.dswa.cache.json
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\3420 Chat Service.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\3420 Chat Service.AssemblyInfoInputs.cache
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\3420 Chat Service.AssemblyInfo.cs
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\3420 Chat Service.csproj.CoreCompileInputs.cache
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\3420 Chat Service.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\appsettings.Development.json
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\appsettings.json
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\3420 Chat Service.staticwebassets.endpoints.json
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\3420 Chat Service.exe
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\3420 Chat Service.deps.json
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\3420 Chat Service.runtimeconfig.json
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\3420 Chat Service.dll
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\3420 Chat Service.pdb
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\Google.Protobuf.dll
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\Grpc.AspNetCore.Server.dll
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\Grpc.AspNetCore.Server.ClientFactory.dll
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\Grpc.Core.Api.dll
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\Grpc.Net.Client.dll
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\Grpc.Net.ClientFactory.dll
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\Grpc.Net.Common.dll
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\MessagePack.dll
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\MessagePack.Annotations.dll
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\Microsoft.AspNetCore.SignalR.StackExchangeRedis.dll
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\Microsoft.NET.StringTools.dll
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\Newtonsoft.Json.dll
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\Pipelines.Sockets.Unofficial.dll
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\bin\Debug\net10.0\StackExchange.Redis.dll
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\rjimswa.dswa.cache.json
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\rjsmrazor.dswa.cache.json
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\scopedcss\bundle\3420 Chat Service.styles.css
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\staticwebassets.build.json
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\staticwebassets.build.json.cache
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\staticwebassets.development.json
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\staticwebassets.build.endpoints.json
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\swae.build.ex.cache
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\3420 Cha.8B989C6F.Up2Date
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\3420 Chat Service.dll
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\refint\3420 Chat Service.dll
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\3420 Chat Service.pdb
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\3420 Chat Service.genruntimeconfig.cache
+C:\Users\jhela\RiderProjects\3420 Chat Service\3420 Chat Service\obj\Debug\net10.0\ref\3420 Chat Service.dll

@@ -1,0 +1,70 @@
+{
+  "version": 2,
+  "dgSpecHash": "FnMkHxnV1Ns=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\jhela\\repos\\3420_group\\3420 Chat Service\\3420 Chat Service\\3420 Chat Service.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\jhela\\.nuget\\packages\\google.protobuf\\3.27.0\\google.protobuf.3.27.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\grpc.aspnetcore\\2.64.0\\grpc.aspnetcore.2.64.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\grpc.aspnetcore.server\\2.64.0\\grpc.aspnetcore.server.2.64.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\grpc.aspnetcore.server.clientfactory\\2.64.0\\grpc.aspnetcore.server.clientfactory.2.64.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\grpc.core.api\\2.64.0\\grpc.core.api.2.64.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\grpc.net.client\\2.64.0\\grpc.net.client.2.64.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\grpc.net.clientfactory\\2.64.0\\grpc.net.clientfactory.2.64.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\grpc.net.common\\2.64.0\\grpc.net.common.2.64.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\grpc.tools\\2.64.0\\grpc.tools.2.64.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\messagepack\\2.5.108\\messagepack.2.5.108.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\messagepack.annotations\\2.5.108\\messagepack.annotations.2.5.108.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\microsoft.aspnetcore.authorization\\2.3.0\\microsoft.aspnetcore.authorization.2.3.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\microsoft.aspnetcore.connections.abstractions\\2.3.0\\microsoft.aspnetcore.connections.abstractions.2.3.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\microsoft.aspnetcore.http.features\\2.3.0\\microsoft.aspnetcore.http.features.2.3.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\microsoft.aspnetcore.signalr.common\\1.2.0\\microsoft.aspnetcore.signalr.common.1.2.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\microsoft.aspnetcore.signalr.core\\1.2.0\\microsoft.aspnetcore.signalr.core.1.2.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\microsoft.aspnetcore.signalr.protocols.json\\1.2.0\\microsoft.aspnetcore.signalr.protocols.json.1.2.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\microsoft.aspnetcore.signalr.stackexchangeredis\\8.0.0\\microsoft.aspnetcore.signalr.stackexchangeredis.8.0.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\6.0.0\\microsoft.extensions.dependencyinjection.6.0.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.2\\microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\microsoft.extensions.http\\6.0.0\\microsoft.extensions.http.6.0.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\microsoft.extensions.logging\\6.0.0\\microsoft.extensions.logging.6.0.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.2\\microsoft.extensions.logging.abstractions.8.0.2.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\microsoft.extensions.options\\8.0.2\\microsoft.extensions.options.8.0.2.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\microsoft.net.stringtools\\17.4.0\\microsoft.net.stringtools.17.4.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\newtonsoft.json\\11.0.2\\newtonsoft.json.11.0.2.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\pipelines.sockets.unofficial\\2.2.8\\pipelines.sockets.unofficial.2.2.8.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\stackexchange.redis\\2.6.122\\stackexchange.redis.2.6.122.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\system.buffers\\4.6.0\\system.buffers.4.6.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\system.diagnostics.diagnosticsource\\6.0.0\\system.diagnostics.diagnosticsource.6.0.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\system.io.pipelines\\8.0.0\\system.io.pipelines.8.0.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\system.memory\\4.5.5\\system.memory.4.5.5.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\system.reflection.emit\\4.7.0\\system.reflection.emit.4.7.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",
+    "C:\\Users\\jhela\\.nuget\\packages\\system.threading.channels\\8.0.0\\system.threading.channels.8.0.0.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1902",
+      "level": "Warning",
+      "message": "Package 'MessagePack' 2.5.108 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-4qm4-8hg2-g2xm",
+      "projectPath": "C:\\Users\\jhela\\repos\\3420_group\\3420 Chat Service\\3420 Chat Service\\3420 Chat Service.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\jhela\\repos\\3420_group\\3420 Chat Service\\3420 Chat Service\\3420 Chat Service.csproj",
+      "libraryId": "MessagePack",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Package 'Newtonsoft.Json' 11.0.2 has a known high severity vulnerability, https://github.com/advisories/GHSA-5crp-9r3c-p9vr",
+      "projectPath": "C:\\Users\\jhela\\repos\\3420_group\\3420 Chat Service\\3420 Chat Service\\3420 Chat Service.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\jhela\\repos\\3420_group\\3420 Chat Service\\3420 Chat Service\\3420 Chat Service.csproj",
+      "libraryId": "Newtonsoft.Json",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
+}
