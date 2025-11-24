@@ -1,7 +1,6 @@
 import { css, CSSResultGroup, html, LitElement, PropertyValues } from "lit";
 import type { IChatMessage, IChatMessageRoomUnaware } from "../Interfaces/IChatMessage";
 import { customElement, property, state } from "lit/decorators.js";
-import { IProtobufChatMessage } from "../Interfaces/IProtobufChatMessage";
 
 // remember to set its id
 @customElement("chat-message")

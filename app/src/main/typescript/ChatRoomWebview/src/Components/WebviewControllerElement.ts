@@ -4,9 +4,9 @@ import { css, html, LitElement } from "lit";
 import { IWebviewController } from "../Interfaces/IWebviewController";
 import { IChatMessage } from "../Interfaces/IChatMessage";
 import { IChatRoom } from "../Interfaces/IChatRoom";
-import { IProtobufChatMessage } from "../Interfaces/IProtobufChatMessage";
 import { ChatRoomElement } from "./ChatRoomElement";
 import { customElement, state } from "lit/decorators.js";
+import { ChatMessage } from "../Generated/chat";
 
 @customElement("webview-controller")
 export class WebviewControllerElement extends LitElement implements IWebviewController {
@@ -63,12 +63,12 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         return false;
     }
 
-    addMessage(message: IProtobufChatMessage): boolean {
+    addMessage(message: ChatMessage): boolean {
         if(!message) {
             //todo log
             return false;
         }
-        const room_id = message.getRoomId();
+        const room_id = message.roomId;
         const room = this._rooms.get(room_id);
         if(!room) {
             //todo log
@@ -77,7 +77,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         return room.addMessage(message);
     }
 
-    addMessages(...messages: IProtobufChatMessage[]): boolean {
+    addMessages(...messages: ChatMessage[]): boolean {
         if(!messages) {
             //todo log
             return false;
@@ -135,7 +135,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         return false;
     }
 
-    getMessage(messageId: string, roomId?: string): IChatMessage | null {
+    getMessage(messageId: string, roomId?: string): ChatMessage | null {
         if(!messageId) {
             //todo log
             return null;
@@ -153,7 +153,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
             }
             msg.roomId = roomId;
             msg.roomName = room.name;
-            return msg as IChatMessage;
+            return msg as unknown as ChatMessage;
         }
         for(const room of this._rooms) {
             const msg = this.getMessage(messageId, room[0]);

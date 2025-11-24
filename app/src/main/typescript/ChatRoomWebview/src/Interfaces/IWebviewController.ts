@@ -2,7 +2,6 @@ import { ChatMessage, ChatRoom } from "../Generated/chat";
 import { IChatMessage } from "./IChatMessage";
 import { IChatRoom } from "./IChatRoom";
 import type { IElementConvertable } from "./IElementConvertable";
-import { IProtobufChatMessage } from "./IProtobufChatMessage";
 
 export type Base64String = string;
 
@@ -12,12 +11,12 @@ export interface IWebviewController extends IElementConvertable {
     removeRoom(roomId: string): boolean;
     switchToRoom(roomId: string): boolean;
 
-    addMessage(message: IProtobufChatMessage): boolean;
-    addMessages(...messages: IProtobufChatMessage[]): boolean;
+    addMessage(message: ChatMessage): boolean;
+    addMessages(...messages: ChatMessage[]): boolean;
     removeMessage(messageId: string, roomId: string) : boolean;
     removeMessages(...messageIds: [messageId: string, roomId: string][]): boolean;
     hasMessage(messageId: string, roomId?: string): boolean;
-    getMessage(messageId: string, roomId?: string) : IChatMessage | null;
+    getMessage(messageId: string, roomId?: string) : ChatMessage | null;
 }
 
 export interface IWebviewControllerDecoder {
