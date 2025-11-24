@@ -37,7 +37,7 @@ public class ChatWebviewFragment extends Fragment implements IWebviewController 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         var frag_manager = requireActivity().getSupportFragmentManager();
-        var webview_owner = (ChatWebviewOwnerFragment) frag_manager.findFragmentByTag(ChatWebviewOwnerFragment.TAG);
+        webview_owner = (ChatWebviewOwnerFragment) frag_manager.findFragmentByTag(ChatWebviewOwnerFragment.TAG);
         if(webview_owner == null) { throw new RuntimeException("Webview owner fragment not found!"); }
         var args = getArguments();
         if(args == null) throw new RuntimeException("Can't construct chat webview without args!");
@@ -46,9 +46,8 @@ public class ChatWebviewFragment extends Fragment implements IWebviewController 
         if(args_obj == null) throw new RuntimeException("Can't construct chat webview without args!");
         if(args_obj.userId == null || args_obj.userId.isBlank()) throw new RuntimeException("Can't construct chat webview without userId!");
         if(args_obj.userName == null || args_obj.userName.isBlank()) throw new RuntimeException("Can't construct chat webview without userName!");
-        webview = webview_owner.load(args_obj.userId, args_obj.userName, () -> {
-            //todo This is where code that uses the webview should be.
-
+        webview_owner.load(args_obj.userId, args_obj.userName);
+        webview_owner.withLoadedWebview(webview -> {
             addRoom(ChatRoom.newBuilder().setId("0").setRoomName("TestRoom").build(), v -> {
                 switchToRoom("0", null);
                 addMessage(ChatMessage.newBuilder()
@@ -68,7 +67,9 @@ public class ChatWebviewFragment extends Fragment implements IWebviewController 
                         .setUserName("Other user")
                         .build(), null);
             });
+
         });
+
     }
 
     @Override
@@ -81,93 +82,91 @@ public class ChatWebviewFragment extends Fragment implements IWebviewController 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        var old_parent = webview.getParent();
-        if(old_parent != null) ((ViewGroup) old_parent).removeView(webview);
-        ((ViewGroup)view).addView(webview);
+        webview_owner.withLoadedWebview(webview -> {
+            var old_parent = webview.getParent();
+            if(old_parent != null) ((ViewGroup) old_parent).removeView(webview);
+            ((ViewGroup)view).addView(webview);
+        });
     }
 
     @Override
     public void addRoom(ChatRoom room, @Nullable JSCallback<Boolean> callback) {
-        if (webview == null) throw new RuntimeException("Can't addRoom, webview not initialized!");
+        webview_owner.withLoadedWebview(webview -> {
+            String js = "window.WebviewController.addRoom("
+                    + "window.WebviewControllerDecoder.decodeChatRoom("
+                    + jsBase64Arg(room)
+                    + "))";
 
-        String js = "window.WebviewController.addRoom("
-                + "window.WebviewControllerDecoder.decodeChatRoom("
-                + jsBase64Arg(room)
-                + "))";
-
-        webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
+            webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
+        });
     }
 
     @Override
     public void removeRoom(String roomId, @Nullable JSCallback<Boolean> callback) {
-        if (webview == null) throw new RuntimeException("Can't removeRoom, webview not initialized!");
-
-        String js = "window.WebviewController.removeRoom(" + jsString(roomId) + ")";
-
-        webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
+        webview_owner.withLoadedWebview(webview -> {
+            String js = "window.WebviewController.removeRoom(" + jsString(roomId) + ")";
+            webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
+        });
     }
 
     @Override
     public void switchToRoom(String roomId, @Nullable JSCallback<Boolean> callback) {
-        if (webview == null) throw new RuntimeException("Can't switchToRoom, webview not initialized!");
-
-        String js = "window.WebviewController.switchToRoom(" + jsString(roomId) + ")";
-
-        webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
+        webview_owner.withLoadedWebview(webview -> {
+            String js = "window.WebviewController.switchToRoom(" + jsString(roomId) + ")";
+            webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
+        });
     }
 
     @Override
     public void addMessage(ChatMessage message, @Nullable JSCallback<Boolean> callback) {
-        if (webview == null) throw new RuntimeException("Can't addMessage, webview not initialized!");
+        webview_owner.withLoadedWebview(webview -> {
+            String js = "window.WebviewController.addMessage("
+                    + "window.WebviewControllerDecoder.decodeChatMessage("
+                    + jsBase64Arg(message)
+                    + "))";
 
-        String js = "window.WebviewController.addMessage("
-                + "window.WebviewControllerDecoder.decodeChatMessage("
-                + jsBase64Arg(message)
-                + "))";
-
-        webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
+            webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
+        });
     }
 
     @Override
     public void addMessages(@Nullable JSCallback<Boolean> callback, ChatMessage... messages) {
         if (messages.length == 0) return;
-        if (webview == null) throw new RuntimeException("Can't addMessages, webview not initialized!");
-
-        String js = "window.WebviewController.addMessages(" + jsListOfBase64(messages) + ")";
-
-        webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
+        webview_owner.withLoadedWebview(webview -> {
+            String js = "window.WebviewController.addMessages(" + jsListOfBase64(messages) + ")";
+            webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
+        });
     }
 
     @Override
     public void removeMessage(String messageId, String roomId, @Nullable JSCallback<Boolean> callback) {
-        if (webview == null) throw new RuntimeException("Can't removeMessage, webview not initialized!");
+        webview_owner.withLoadedWebview(webview -> {
+            String js = "window.WebviewController.removeMessage("
+                    + jsString(messageId) + ", " + jsString(roomId) + ")";
 
-        String js = "window.WebviewController.removeMessage("
-                + jsString(messageId) + ", " + jsString(roomId) + ")";
-
-        webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
+            webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
+        });
     }
 
     @Override
     public void removeMessages(@Nullable JSCallback<Boolean> callback, RemoveMessageTuple... messages) {
         if (messages.length == 0) return;
-        if (webview == null) throw new RuntimeException("Can't removeMessages, webview not initialized!");
-
-        String js = "window.WebviewController.removeMessages(" + jsRemoveTupleList(messages) + ")";
-
-        webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
+        webview_owner.withLoadedWebview(webview -> {
+            String js = "window.WebviewController.removeMessages(" + jsRemoveTupleList(messages) + ")";
+            webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
+        });
     }
 
     @Override
     public void hasMessage(String messageId, @Nullable String roomId, @Nullable JSCallback<Boolean> callback) {
-        if (webview == null) throw new RuntimeException("Can't call hasMessage, webview not initialized!");
+        webview_owner.withLoadedWebview(webview -> {
+            String js = "window.WebviewController.hasMessage("
+                    + jsString(messageId) + ","
+                    + (roomId == null ? "null" : jsString(roomId))
+                    + ")";
 
-        String js = "window.WebviewController.hasMessage("
-                + jsString(messageId) + ","
-                + (roomId == null ? "null" : jsString(roomId))
-                + ")";
-
-        webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
+            webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
+        });
     }
 
     public static class Arguments implements Parcelable {
@@ -247,6 +246,6 @@ public class ChatWebviewFragment extends Fragment implements IWebviewController 
         out.append("]");
         return out.toString();
     }
+    private ChatWebviewOwnerFragment webview_owner;
 
-    private WebView webview;
 }

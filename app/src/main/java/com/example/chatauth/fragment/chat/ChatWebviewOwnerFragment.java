@@ -23,10 +23,12 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.webkit.WebViewAssetLoader;
 
+import java.util.ArrayList;
+
 public class ChatWebviewOwnerFragment extends Fragment {
     public static final String TAG = "WebviewOwnerFragment";
 
-    public WebView load(String userId, String userName, Runnable whenLoaded) {
+    public void load(String userId, String userName) {
         if (webview == null) {
             Context ctx = requireContext().getApplicationContext();
             asset_loader = new WebViewAssetLoader.Builder()
@@ -51,13 +53,15 @@ public class ChatWebviewOwnerFragment extends Fragment {
             });
         }
         if(bridge != null) {
-            if(bridge.userId.equals(userId) && bridge.userName.equals(userName)) return webview;
+            if(bridge.userId.equals(userId) && bridge.userName.equals(userName)) return;
             webview.removeJavascriptInterface("AndroidBridge");
         }
-        bridge = new AndroidBridge(userId, userName, whenLoaded);
+        bridge = new AndroidBridge(userId, userName, () -> {
+            for(WithWebviewCallback cb : pending_callbacks) cb.execute(webview);
+            pending_callbacks.clear();
+        });
         webview.addJavascriptInterface(bridge, "AndroidBridge");
         webview.loadUrl("https://appassets.androidplatform.net/assets/index.html");
-        return webview;
     }
 
     @Override
@@ -72,9 +76,20 @@ public class ChatWebviewOwnerFragment extends Fragment {
         return null;
     }
 
+    public void withLoadedWebview(WithWebviewCallback callback) {
+        if(bridge.getLoaded()) callback.execute(webview);
+        else pending_callbacks.add(callback);
+    }
+
     private WebView webview;
     private WebViewAssetLoader asset_loader;
     private AndroidBridge bridge;
+    private ArrayList<WithWebviewCallback> pending_callbacks = new ArrayList<>();
+
+    @FunctionalInterface
+    public interface WithWebviewCallback {
+        void execute(WebView webview);
+    }
 
     private static class AndroidBridge {
         private final String userId;
@@ -101,9 +116,15 @@ public class ChatWebviewOwnerFragment extends Fragment {
 
         @JavascriptInterface
         public void setLoaded() {
-            if(loaded) return;
-            loaded = true;
-            new Handler(Looper.getMainLooper()).post(loadCb);
+            handler.post(() -> {
+                if(loaded) return;
+                loaded = true;
+                loadCb.run();
+            });
         }
+
+        public boolean getLoaded() { return loaded; }
+
+        private final Handler handler = new Handler(Looper.getMainLooper());
     }
 }
