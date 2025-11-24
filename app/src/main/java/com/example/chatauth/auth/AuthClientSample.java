@@ -1,5 +1,9 @@
 package com.example.chatauth.auth;
 
+import androidx.annotation.Nullable;
+
+import com.example.chatauth.helpers.UIStreamResponse;
+
 import io.grpc.ClientInterceptor;
 import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
@@ -19,14 +23,14 @@ import ink.bluballz.chat.auth.v1.ValidateTokenResponse;
 
 public class AuthClientSample {
     private ManagedChannel channel;
-    private AuthServiceBlockingStub stub;
+    private AuthServiceGrpc.AuthServiceStub stub;
 
     /** Connect to your gRPC auth server. For dev you can keep plaintext. */
     public void connect(String host, int port) {
         channel = OkHttpChannelBuilder.forAddress(host, port)
                 .usePlaintext() // DEV ONLY. Use TLS for production.
                 .build();
-        stub = AuthServiceGrpc.newBlockingStub(channel);
+        stub = AuthServiceGrpc.newStub(channel);
     }
 
     /** Close the channel (e.g., on Activity.onDestroy). */
@@ -40,42 +44,42 @@ public class AuthClientSample {
 
     // ===== Convenience RPCs =====
 
-    public AuthResponse register(String email, String pass, String name) {
+    public void register(String email, String pass, String name, @Nullable UIStreamResponse.OnResultCallback<AuthResponse> then) {
         RegisterRequest req = RegisterRequest.newBuilder()
                 .setEmail(email)
                 .setPassword(pass)
                 .setDisplayName(name)
                 .build();
-        return stub.register(req);
+        stub.register(req, new UIStreamResponse<>(then));
     }
 
-    public AuthResponse login(String email, String pass) {
+    public void login(String email, String pass, @Nullable UIStreamResponse.OnResultCallback<AuthResponse> then) {
         LoginRequest req = LoginRequest.newBuilder()
                 .setEmail(email)
                 .setPassword(pass)
                 .build();
-        return stub.login(req);
+        stub.login(req, new UIStreamResponse<>(then));
     }
 
-    public ValidateTokenResponse validate(String accessToken) {
+    public void validate(String accessToken, @Nullable UIStreamResponse.OnResultCallback<ValidateTokenResponse> then) {
         ValidateTokenRequest req = ValidateTokenRequest.newBuilder()
                 .setToken(accessToken)
                 .build();
-        return stub.validateToken(req);
+        stub.validateToken(req, new UIStreamResponse<>(then));
     }
 
-    public AuthTokens refresh(String refreshToken) {
+    public void refresh(String refreshToken, @Nullable UIStreamResponse.OnResultCallback<AuthTokens> then) {
         RefreshRequest req = RefreshRequest.newBuilder()
                 .setRefreshToken(refreshToken)
                 .build();
-        return stub.refresh(req);
+        stub.refresh(req, new UIStreamResponse<>(then));
     }
 
     /**
      * Returns a stub that adds `Authorization: Bearer <token>` to every call.
      * Use this for any protected service calls.
      */
-    public AuthServiceBlockingStub withAuth(String accessToken) {
+    public AuthServiceGrpc.AuthServiceStub withAuth(String accessToken) {
         Metadata meta = new Metadata();
         Metadata.Key<String> AUTH =
                 Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER);

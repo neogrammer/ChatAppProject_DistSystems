@@ -36,13 +36,13 @@ public class ChatWebviewOwnerFragment extends Fragment {
                     return asset_loader.shouldInterceptRequest(request.getUrl());
                 }
             });
-//            var args_bundle = getArguments();
-//            if(args_bundle == null) throw new RuntimeException("Can't construct webview owner without args!");
-//            args_bundle.setClassLoader(Arguments.class.getClassLoader());
-//            var args = args_bundle.getParcelable("args", Arguments.class);
-//            if(args == null) throw new RuntimeException("Can't construct webview owner without args!");
         }
-        webview.addJavascriptInterface(new AndroidBridge(userId, userName), "AndroidBridge");
+        if(bridge != null) {
+            if(bridge.userId.equals(userId) && bridge.userName.equals(userName)) return webview;
+            webview.removeJavascriptInterface("AndroidBridge");
+        }
+        bridge = new AndroidBridge(userId, userName);
+        webview.addJavascriptInterface(bridge, "AndroidBridge");
         webview.loadUrl("https://appassets.androidplatform.net/assets/index.html");
         return webview;
     }
@@ -61,6 +61,7 @@ public class ChatWebviewOwnerFragment extends Fragment {
 
     private WebView webview;
     private WebViewAssetLoader asset_loader;
+    private AndroidBridge bridge;
 
     private static class AndroidBridge {
         private final String userId;
