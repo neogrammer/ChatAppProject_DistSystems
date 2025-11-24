@@ -12,3 +12,8 @@ message ChatMessage {
   string content   = 5;
   int64  createdAt = 6;  // unix millis
 }
+
+message ChatRoom {
+  string id = 1;
+  string roomName = 2;
+}

@@ -4,10 +4,13 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
@@ -34,6 +37,14 @@ public class ChatWebviewOwnerFragment extends Fragment {
                 @Override
                 public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                     return asset_loader.shouldInterceptRequest(request.getUrl());
+                }
+            });
+
+            webview.setWebChromeClient(new WebChromeClient() {
+                @Override
+                public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                    Log.d("ChatWebviewOwnerFragment", consoleMessage.message());
+                    return true;
                 }
             });
         }

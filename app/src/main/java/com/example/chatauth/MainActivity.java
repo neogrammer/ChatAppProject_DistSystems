@@ -8,12 +8,17 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.chatauth.fragment.loading.LoadingDialogFragment;
 import com.example.chatauth.fragment.chat.ChatWebviewOwnerFragment;
 
 public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // init loading dialog
+        LoadingDialogFragment.assignActivityHost(this);
+
         setContentView(R.layout.activity_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.nav_main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());

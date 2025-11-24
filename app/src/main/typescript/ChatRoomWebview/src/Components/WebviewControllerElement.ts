@@ -11,6 +11,10 @@ import { customElement, state } from "lit/decorators.js";
 @customElement("webview-controller")
 export class WebviewControllerElement extends LitElement implements IWebviewController {
     addRoom(room: IChatRoom): boolean {
+        if(!room) {
+            //todo log 
+            return false;
+        }
         if(!room.id || room.id.length === 0) {
             //todo log
             return false;
@@ -27,6 +31,10 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
     }
 
     removeRoom(roomId: string): boolean {
+        if(!roomId) {
+            //todo log
+            return false;
+        }
         if(roomId === this.current_room) {
             if(this._rooms.size === 1) {
                 //todo log
@@ -43,6 +51,10 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
     }
 
     switchToRoom(roomId: string): boolean {
+        if(!roomId) {
+            //todo log
+            return false;
+        }
         if(this._rooms.has(roomId)) {
             this.current_room = roomId;
             return true;
@@ -52,6 +64,10 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
     }
 
     addMessage(message: IProtobufChatMessage): boolean {
+        if(!message) {
+            //todo log
+            return false;
+        }
         const room_id = message.getRoomId();
         const room = this._rooms.get(room_id);
         if(!room) {
@@ -62,6 +78,10 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
     }
 
     addMessages(...messages: IProtobufChatMessage[]): boolean {
+        if(!messages) {
+            //todo log
+            return false;
+        }
         let all_true = true;
         for(const message of messages) {
             const result = this.addMessage(message);
@@ -71,6 +91,10 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
     }
 
     removeMessage(messageId: string, roomId: string): boolean {
+        if(!messageId || !roomId) {
+            //todo log
+            return false;
+        }
         const room = this._rooms.get(roomId);
         if(!room) {
             //todo log
@@ -80,6 +104,10 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
     }
 
     removeMessages(...messageIds: [messageId: string, roomId: string][]): boolean {
+        if(!messageIds) {
+            //todo log
+            return false;
+        }
         let all_true = true;
         for(const message of messageIds) {
             const result = this.removeMessage(...message);
@@ -89,6 +117,10 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
     }
 
     hasMessage(messageId: string, roomId?: string): boolean {
+        if(!messageId) {
+            //todo log
+            return false;
+        }
         if(roomId && roomId.length !== 0) {
             const room = this._rooms.get(roomId);
             if(!room) {
@@ -104,6 +136,10 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
     }
 
     getMessage(messageId: string, roomId?: string): IChatMessage | null {
+        if(!messageId) {
+            //todo log
+            return null;
+        }
         if(roomId && roomId.length !== 0) {
             const room = this._rooms.get(roomId);
             if(!room) {
