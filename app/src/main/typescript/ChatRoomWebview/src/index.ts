@@ -1,12 +1,14 @@
 ﻿import "./Components/WebviewControllerElement"
+import { ChatMessage, ChatRoom, MessageFns } from "./Generated/chat";
 import { IProtobufChatMessage } from "./Interfaces/IProtobufChatMessage";
+import { IWebviewController, IWebviewControllerDecoder } from "./Interfaces/IWebviewController";
 import "./base.css";
-
-
 
 declare global {
   const DEBUG: boolean;
   const AndroidBridge: IAndroidBridge;
+  const WebviewController: IWebviewController;
+  const WebviewControllerDecoder: IWebviewControllerDecoder;
 
   interface IAndroidBridge {
     getUserName(): string;
@@ -16,24 +18,47 @@ declare global {
   interface Window {
     DEBUG: boolean;
     AndroidBridge: IAndroidBridge;
+    WebviewController: IWebviewController;
+    WebviewControllerDecoder: IWebviewControllerDecoder;
   }
 }
 
-function makeDummyMessage(id: string, roomId: string, userId: string, content: string, userName: string): IProtobufChatMessage {
-  return {
-    getId: () => id,
-    getContent: () => content,
-    getCreatedAt: () => Date.now(),
-    getRoomId: () => roomId,
-    getUserId: () => userId,
-    getUserName: () => userName
+if(DEBUG) {
+  function makeDummyMessage(id: string, roomId: string, userId: string, content: string, userName: string): IProtobufChatMessage {
+    return {
+      getId: () => id,
+      getContent: () => content,
+      getCreatedAt: () => Date.now(),
+      getRoomId: () => roomId,
+      getUserId: () => userId,
+      getUserName: () => userName
+    }
   }
 }
 
-const controller = document.querySelector('webview-controller');
-controller!.addRoom({id: "0", roomName: "Test Room"});
-controller!.switchToRoom("0");
-controller!.addMessage(makeDummyMessage("0", "0", "0", "Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message ", "Tyler"));
-setTimeout(() => {
-  controller!.addMessage(makeDummyMessage("1", "0", "2", "Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message ", "User"));
-}, 1000);
+window['WebviewController'] = document.querySelector('webview-controller') as IWebviewController;
+window["WebviewControllerDecoder"] = {
+  toByteArray(b64: string) {
+    const bin = atob(b64);
+    const len = bin.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = bin.charCodeAt(i);
+    }
+    return bytes;
+  },
+  decodeChatMessage(b64: string) {
+    return ChatMessage.decode(this.toByteArray(b64));
+  },
+  decodeChatRoom(b64) {
+    return ChatRoom.decode(this.toByteArray(b64));
+  },
+}
+
+// const controller = document.querySelector('webview-controller');
+// controller!.addRoom({id: "0", roomName: "Test Room"});
+// controller!.switchToRoom("0");
+// controller!.addMessage(makeDummyMessage("0", "0", "0", "Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message ", "Tyler"));
+// setTimeout(() => {
+//   controller!.addMessage(makeDummyMessage("1", "0", "2", "Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message ", "User"));
+// }, 1000);
