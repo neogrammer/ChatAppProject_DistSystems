@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import com.example.chatauth.auth.AuthClientSample;
 import com.example.chatauth.auth.TokenStore;
 import com.example.chatauth.databinding.FragmentLoginBinding;
+import com.example.chatauth.fragment.loading.LoadingDialogFragment;
 
 import java.util.concurrent.Executors;
 
@@ -39,6 +40,7 @@ public class LoginFragment extends Fragment {
         client.connect(HOST, PORT);
 
         binding.btnRegister.setOnClickListener(v -> {
+            LoadingDialogFragment.show();
             client.register(binding.email.getText().toString(), binding.password.getText().toString(), "AndroidUser", (res, err) -> {
                 try {
                     tokenStore.save(res.getTokens().getAccessToken(), res.getTokens().getRefreshToken());
@@ -46,10 +48,12 @@ public class LoginFragment extends Fragment {
                 } catch (Exception e) {
                     binding.result.setText("Register error: " + e.getMessage());
                 }
+                LoadingDialogFragment.hide();
             });
         });
 
         binding.btnLogin.setOnClickListener(v -> {
+            LoadingDialogFragment.show();
             client.login(binding.email.getText().toString(), binding.password.getText().toString(), (res, err) -> {
                 try {
                     tokenStore.save(res.getTokens().getAccessToken(), res.getTokens().getRefreshToken());
@@ -57,6 +61,7 @@ public class LoginFragment extends Fragment {
                 } catch (Exception e) {
                     binding.result.setText("Login error: " + e.getMessage());
                 }
+                LoadingDialogFragment.hide();
             });
         });
 

@@ -26,7 +26,7 @@ public class ChatWebviewFragment extends Fragment {
         var args = getArguments();
         if(args == null) throw new RuntimeException("Can't construct chat webview without args!");
         args.setClassLoader(Arguments.class.getClassLoader());
-        var args_obj = args.getParcelable("args", Arguments.class);
+        var args_obj = (Arguments)args.getParcelable("args");
         if(args_obj == null) throw new RuntimeException("Can't construct chat webview without args!");
         if(args_obj.userId == null || args_obj.userId.isBlank()) throw new RuntimeException("Can't construct chat webview without userId!");
         if(args_obj.userName == null || args_obj.userName.isBlank()) throw new RuntimeException("Can't construct chat webview without userName!");
