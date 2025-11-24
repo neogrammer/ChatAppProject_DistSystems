@@ -7,7 +7,7 @@
     "build:debug": "cross-env DEBUG=true webpack --config webpack.config.js --mode development",
     "build:release": "cross-env DEBUG=false webpack --config webpack.config.js --mode production",
     "type-check": "tsc --noEmit",
-    "gen:proto": "npx rimraf src/Generated && mkdirp src/Generated && protoc --ts_proto_out=src/Generated --ts_proto_opt=esModuleInterop=true,forceLong=long --proto_path=../../proto ../../proto/chat.proto",
+    "gen:proto": "npx rimraf src/Generated && mkdirp src/Generated && protoc --ts_proto_out=src/Generated --ts_proto_opt=esModuleInterop=true --proto_path=../../proto ../../proto/chat.proto",
     "prebuild:debug": "npm run gen:proto",
     "prebuild:release": "npm run gen:proto",
     "prestart": "npm run gen:proto"

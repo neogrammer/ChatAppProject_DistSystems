@@ -23,11 +23,15 @@ import com.google.protobuf.MessageLite;
 
 import org.json.JSONObject;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.Objects;
 
 import ink.bluballz.chat.v1.ChatMessage;
 import ink.bluballz.chat.v1.ChatRoom;
 
+//todo ensureLoaded
+//todo onPostMessage
 public class ChatWebviewFragment extends Fragment implements IWebviewController {
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,6 +51,22 @@ public class ChatWebviewFragment extends Fragment implements IWebviewController 
 
             addRoom(ChatRoom.newBuilder().setId("0").setRoomName("TestRoom").build(), v -> {
                 switchToRoom("0", null);
+                addMessage(ChatMessage.newBuilder()
+                        .setId("0")
+                        .setContent("Hello World!")
+                        .setCreatedAt(Instant.now().toEpochMilli())
+                        .setRoomId("0")
+                        .setUserId(args_obj.userId)
+                        .setUserName(args_obj.userName)
+                        .build(), null);
+                addMessage(ChatMessage.newBuilder()
+                        .setId("1")
+                        .setContent("Hi World!")
+                        .setCreatedAt(Instant.now().toEpochMilli())
+                        .setRoomId("0")
+                        .setUserId("123")
+                        .setUserName("Other user")
+                        .build(), null);
             });
         });
     }

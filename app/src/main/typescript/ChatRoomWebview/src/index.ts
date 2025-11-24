@@ -1,6 +1,5 @@
 ﻿import "./Components/WebviewControllerElement"
 import { ChatMessage, ChatRoom, MessageFns } from "./Generated/chat";
-import { IProtobufChatMessage } from "./Interfaces/IProtobufChatMessage";
 import { IWebviewController, IWebviewControllerDecoder } from "./Interfaces/IWebviewController";
 import "./base.css";
 
@@ -26,14 +25,14 @@ declare global {
 }
 
 if(DEBUG) {
-  function makeDummyMessage(id: string, roomId: string, userId: string, content: string, userName: string): IProtobufChatMessage {
+  function makeDummyMessage(id: string, roomId: string, userId: string, content: string, userName: string): ChatMessage {
     return {
-      getId: () => id,
-      getContent: () => content,
-      getCreatedAt: () => Date.now(),
-      getRoomId: () => roomId,
-      getUserId: () => userId,
-      getUserName: () => userName
+      id: id,
+      content: content,
+      createdAt: Date.now(),
+      roomId: roomId,
+      userId: userId,
+      userName: userName
     }
   }
 }

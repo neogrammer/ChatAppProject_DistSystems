@@ -2,17 +2,17 @@ import "./ChatMessageElement"
 
 import { css, CSSResultGroup, html, LitElement } from "lit";
 import { customElement, property, queryAssignedElements } from "lit/decorators.js";
-import { IProtobufChatMessage } from "../Interfaces/IProtobufChatMessage";
 import { ChatMessageElement } from "./ChatMessageElement";
 import { IChatMessage, IChatMessageRoomUnaware } from "../Interfaces/IChatMessage";
+import { ChatMessage } from "../Generated/chat";
 
 // dont forget to set id
 @customElement("chat-room")
 export class ChatRoomElement extends LitElement {
     name!: string;
 
-    addMessage(message: IProtobufChatMessage): boolean {
-        const insert_ref = this.findInsertionElement(message.getCreatedAt());
+    addMessage(message: ChatMessage): boolean {
+        const insert_ref = this.findInsertionElement(message.createdAt);
         const insert_element = ChatRoomElement.protoToElement(message);
         insert_ref === null ? this.prepend(insert_element) : insert_ref.after(insert_element);
         return true;
@@ -105,13 +105,13 @@ export class ChatRoomElement extends LitElement {
         return result;
     }
 
-    private static protoToElement(message: IProtobufChatMessage): ChatMessageElement {
+    private static protoToElement(message: ChatMessage): ChatMessageElement {
         const element = document.createElement('chat-message');
-        element.id = message.getId();
-        element.senderId = message.getUserId();
-        element.senderName = message.getUserName();
-        element.createdAt = message.getCreatedAt();
-        element.append(message.getContent());
+        element.id = message.id;
+        element.senderId = message.userId;
+        element.senderName = message.userName;
+        element.createdAt = message.createdAt;
+        element.append(message.content);
         return element;
     }
 }
