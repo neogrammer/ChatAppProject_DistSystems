@@ -1,4 +1,4 @@
-package com.example.chatauth;
+package com.example.chatauth.auth;
 
 import io.grpc.ClientInterceptor;
 import io.grpc.ManagedChannel;

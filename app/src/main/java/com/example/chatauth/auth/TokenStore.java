@@ -1,4 +1,4 @@
-package com.example.chatauth;
+package com.example.chatauth.auth;
 
 import android.content.Context;
 import androidx.security.crypto.EncryptedSharedPreferences;
