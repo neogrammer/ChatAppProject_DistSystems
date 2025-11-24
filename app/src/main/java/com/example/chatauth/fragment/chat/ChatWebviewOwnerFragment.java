@@ -2,6 +2,8 @@ package com.example.chatauth.fragment.chat;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -24,7 +26,7 @@ import androidx.webkit.WebViewAssetLoader;
 public class ChatWebviewOwnerFragment extends Fragment {
     public static final String TAG = "WebviewOwnerFragment";
 
-    public WebView load(String userId, String userName) {
+    public WebView load(String userId, String userName, Runnable whenLoaded) {
         if (webview == null) {
             Context ctx = requireContext().getApplicationContext();
             asset_loader = new WebViewAssetLoader.Builder()
@@ -52,7 +54,7 @@ public class ChatWebviewOwnerFragment extends Fragment {
             if(bridge.userId.equals(userId) && bridge.userName.equals(userName)) return webview;
             webview.removeJavascriptInterface("AndroidBridge");
         }
-        bridge = new AndroidBridge(userId, userName);
+        bridge = new AndroidBridge(userId, userName, whenLoaded);
         webview.addJavascriptInterface(bridge, "AndroidBridge");
         webview.loadUrl("https://appassets.androidplatform.net/assets/index.html");
         return webview;
@@ -78,9 +80,13 @@ public class ChatWebviewOwnerFragment extends Fragment {
         private final String userId;
         private final String userName;
 
-        public AndroidBridge(String userId, String userName) {
+        private boolean loaded = false;
+        private final Runnable loadCb;
+
+        public AndroidBridge(String userId, String userName, Runnable loadCb) {
             this.userId = userId;
             this.userName = userName;
+            this.loadCb = loadCb;
         }
 
         @JavascriptInterface
@@ -91,6 +97,13 @@ public class ChatWebviewOwnerFragment extends Fragment {
         @JavascriptInterface
         public String getUserName() {
             return userName;
+        }
+
+        @JavascriptInterface
+        public void setLoaded() {
+            if(loaded) return;
+            loaded = true;
+            new Handler(Looper.getMainLooper()).post(loadCb);
         }
     }
 }
