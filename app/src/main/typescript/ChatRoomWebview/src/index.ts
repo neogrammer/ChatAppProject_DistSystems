@@ -14,6 +14,7 @@ declare global {
     getUserId(): string;
 
     setLoaded(): void;
+    postMessage(b64: string): void;
   }
 
   interface Window {
@@ -35,6 +36,15 @@ if(DEBUG) {
       userName: userName
     }
   }
+
+  // const controller = document.querySelector('webview-controller');
+  // controller!.addRoom({id: "0", roomName: "Test Room"});
+  // controller!.switchToRoom("0");
+  // controller!.addMessage(makeDummyMessage("0", "0", "0", "Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message ", "Tyler"));
+  // setTimeout(() => {
+  //   controller!.addMessage(makeDummyMessage("1", "0", "2", "Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message ", "User"));
+  // }, 1000);
+
 }
 
 customElements.whenDefined('webview-controller').then(() => {
@@ -60,10 +70,4 @@ customElements.whenDefined('webview-controller').then(() => {
 })
 
 
-// const controller = document.querySelector('webview-controller');
-// controller!.addRoom({id: "0", roomName: "Test Room"});
-// controller!.switchToRoom("0");
-// controller!.addMessage(makeDummyMessage("0", "0", "0", "Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message ", "Tyler"));
-// setTimeout(() => {
-//   controller!.addMessage(makeDummyMessage("1", "0", "2", "Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message ", "User"));
-// }, 1000);
+
