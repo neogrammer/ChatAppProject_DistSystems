@@ -8,7 +8,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.chatauth.fragment.chat.WebviewOwnerFragment;
+import com.example.chatauth.fragment.chat.ChatWebviewOwnerFragment;
 
 public class MainActivity extends AppCompatActivity {
     @Override
@@ -22,11 +22,10 @@ public class MainActivity extends AppCompatActivity {
         });
         EdgeToEdge.enable(this);
 
-        //todo do this after fragment navigation
         // add retained webview fragment
-//        var frag_manager = getSupportFragmentManager();
-//        if(frag_manager.findFragmentByTag(WebviewOwnerFragment.TAG) == null) {
-//            frag_manager.beginTransaction().add(new WebviewOwnerFragment(), WebviewOwnerFragment.TAG).commit();
-//        }
+        var frag_manager = getSupportFragmentManager();
+        if(frag_manager.findFragmentByTag(ChatWebviewOwnerFragment.TAG) == null) {
+            frag_manager.beginTransaction().add(new ChatWebviewOwnerFragment(), ChatWebviewOwnerFragment.TAG).commit();
+        }
     }
 }

@@ -16,7 +16,7 @@ import java.util.concurrent.Executors;
 
 //todo move edit text contents to viewmodel so it survives process death
 public class LoginFragment extends Fragment {
-    private final java.util.concurrent.Executor bg = Executors.newSingleThreadExecutor();
+    //private final java.util.concurrent.Executor bg = Executors.newSingleThreadExecutor();
     private AuthClientSample client;
     private TokenStore tokenStore;
 
@@ -38,25 +38,27 @@ public class LoginFragment extends Fragment {
         client = new AuthClientSample();
         client.connect(HOST, PORT);
 
-        binding.btnRegister.setOnClickListener(v -> bg.execute(() -> {
-            try {
-                var res = client.register(binding.email.getText().toString(), binding.password.getText().toString(), "AndroidUser");
-                tokenStore.save(res.getTokens().getAccessToken(), res.getTokens().getRefreshToken());
-                binding.result.setText("Registered: " + res.getEmail());
-            } catch (Exception e) {
-                binding.result.setText("Register error: " + e.getMessage());
-            }
-        }));
+        binding.btnRegister.setOnClickListener(v -> {
+            client.register(binding.email.getText().toString(), binding.password.getText().toString(), "AndroidUser", (res, err) -> {
+                try {
+                    tokenStore.save(res.getTokens().getAccessToken(), res.getTokens().getRefreshToken());
+                    binding.result.setText("Registered: " + res.getEmail());
+                } catch (Exception e) {
+                    binding.result.setText("Register error: " + e.getMessage());
+                }
+            });
+        });
 
-        binding.btnLogin.setOnClickListener(v -> bg.execute(() -> {
-            try {
-                var res = client.login(binding.email.getText().toString(), binding.password.getText().toString());
-                tokenStore.save(res.getTokens().getAccessToken(), res.getTokens().getRefreshToken());
-                binding.result.setText("Logged in: " + res.getEmail());
-            } catch (Exception e) {
-                binding.result.setText("Login error: " + e.getMessage());
-            }
-        }));
+        binding.btnLogin.setOnClickListener(v -> {
+            client.login(binding.email.getText().toString(), binding.password.getText().toString(), (res, err) -> {
+                try {
+                    tokenStore.save(res.getTokens().getAccessToken(), res.getTokens().getRefreshToken());
+                    binding.result.setText("Logged in: " + res.getEmail());
+                } catch (Exception e) {
+                    binding.result.setText("Login error: " + e.getMessage());
+                }
+            });
+        });
 
         return binding.getRoot();
     }
