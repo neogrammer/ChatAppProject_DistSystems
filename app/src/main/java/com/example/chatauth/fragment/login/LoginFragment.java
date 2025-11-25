@@ -40,46 +40,48 @@ public class LoginFragment extends Fragment {
         // Inflate the layout for this fragment
         binding = FragmentLoginBinding.inflate(inflater);
 
-        tokenStore = new TokenStore(requireContext());
-        client = new AuthClientSample();
-        client.connect(HOST, PORT);
+//        tokenStore = new TokenStore(requireContext());
+//        client = new AuthClientSample();
+//        client.connect(HOST, PORT);
 
-        binding.btnRegister.setOnClickListener(v -> {
-            LoadingDialogFragment.show();
-            client.register(binding.email.getText().toString(), binding.password.getText().toString(), "AndroidUser", (res, err) -> {
-                try {
-                    tokenStore.save(res.getTokens().getAccessToken(), res.getTokens().getRefreshToken());
-                    binding.result.setText("Registered: " + res.getEmail());
-                } catch (Exception e) {
-                    binding.result.setText("Register error: " + e.getMessage());
-                }
-                LoadingDialogFragment.hide();
-            });
-        });
+//        binding.btnRegister.setOnClickListener(v -> {
+//            LoadingDialogFragment.show();
+//            client.register(binding.email.getText().toString(), binding.password.getText().toString(), "AndroidUser", (res, err) -> {
+//                try {
+//                    tokenStore.save(res.getTokens().getAccessToken(), res.getTokens().getRefreshToken());
+//                    binding.result.setText("Registered: " + res.getEmail());
+//                } catch (Exception e) {
+//                    binding.result.setText("Register error: " + e.getMessage());
+//                }
+//                LoadingDialogFragment.hide();
+//            });
+//        });
+//
+//        binding.btnLogin.setOnClickListener(v -> {
+//            LoadingDialogFragment.show();
+//            client.login(binding.email.getText().toString(), binding.password.getText().toString(), (res, err) -> {
+//                try {
+//                    tokenStore.save(res.getTokens().getAccessToken(), res.getTokens().getRefreshToken());
+//                    binding.result.setText("Logged in: " + res.getEmail());
+//                } catch (Exception e) {
+//                    binding.result.setText("Login error: " + e.getMessage());
+//                }
+//                LoadingDialogFragment.hide();
+//            });
+//        });
 
-        binding.btnLogin.setOnClickListener(v -> {
-            LoadingDialogFragment.show();
-            client.login(binding.email.getText().toString(), binding.password.getText().toString(), (res, err) -> {
-                try {
-                    tokenStore.save(res.getTokens().getAccessToken(), res.getTokens().getRefreshToken());
-                    binding.result.setText("Logged in: " + res.getEmail());
-                } catch (Exception e) {
-                    binding.result.setText("Login error: " + e.getMessage());
-                }
-                LoadingDialogFragment.hide();
-            });
-        });
+
 
         return binding.getRoot();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        var nc = NavHostFragment.findNavController(this);
-        var args = new ChatWebviewFragment.Arguments("0", "TestUser");
-        var bundle = new Bundle();
-        bundle.putParcelable("args", args);
-        nc.navigate(R.id.action_loginFragment_to_chatWebviewFragment, bundle);
-    }
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        var nc = NavHostFragment.findNavController(this);
+//        var args = new ChatWebviewFragment.Arguments("0", "TestUser");
+//        var bundle = new Bundle();
+//        bundle.putParcelable("args", args);
+//        nc.navigate(R.id.action_loginFragment_to_chatWebviewFragment, bundle);
+//    }
 }

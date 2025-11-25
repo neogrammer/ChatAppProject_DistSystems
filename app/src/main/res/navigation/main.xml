@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_main"
-    app:startDestination="@id/loginFragment">
+    app:startDestination="@id/loginOrRegisterFragment">
 
     <fragment
         android:id="@+id/loginFragment"
@@ -21,5 +21,25 @@
         <argument
             android:name="args"
             app:argType="com.example.chatauth.fragment.chat.ChatWebviewFragment$Arguments" />
+    </fragment>
+    <fragment
+        android:id="@+id/loginOrRegisterFragment"
+        android:name="com.example.chatauth.fragment.loginorregister.LoginOrRegisterFragment"
+        android:label="fragment_login_or_register"
+        tools:layout="@layout/fragment_login_or_register" >
+        <action
+            android:id="@+id/action_loginOrRegisterFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_loginOrRegisterFragment_to_registerFragment"
+            app:destination="@id/registerFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.example.chatauth.fragment.register.RegisterFragment"
+        android:label="RegisterFragment" >
+        <action
+            android:id="@+id/action_registerFragment_to_chatWebviewFragment"
+            app:destination="@id/chatWebviewFragment" />
     </fragment>
 </navigation>
