@@ -69,10 +69,14 @@ public class LoginFragment extends Fragment {
         binding.btnLogin.setOnClickListener(v -> {
             LoadingDialogFragment.show();
             final var data = ((MainActivity)requireActivity()).getViewModel();
-            data.client.login(binding.email.getText().toString(), binding.password.getText().toString(), (res, err) -> {
+            data.client.login(current_data.email.getValue(), current_data.password.getValue(), (res, err) -> {
                 try{
                     data.tokenStore.save(res.getTokens().getAccessToken(), res.getTokens().getRefreshToken());
-                    //todo nav
+                    var nc = NavHostFragment.findNavController(this);
+                    var args = new ChatWebviewFragment.Arguments(res.getUserId(), res.getDisplayName());
+                    var bundle = new Bundle();
+                    bundle.putParcelable("args", args);
+                    nc.navigate(R.id.action_loginFragment_to_chatWebviewFragment, bundle);
                 }
                 catch (Exception e) {
                     binding.result.setText("Login error: " + e.getMessage());

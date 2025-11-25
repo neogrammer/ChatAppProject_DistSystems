@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -17,6 +18,7 @@ import android.view.ViewGroup;
 import com.example.chatauth.MainActivity;
 import com.example.chatauth.R;
 import com.example.chatauth.databinding.FragmentRegisterBinding;
+import com.example.chatauth.fragment.chat.ChatWebviewFragment;
 import com.example.chatauth.fragment.loading.LoadingDialogFragment;
 
 public class RegisterFragment extends Fragment {
@@ -47,10 +49,14 @@ public class RegisterFragment extends Fragment {
         binding.btnRegister.setOnClickListener(v -> {
             LoadingDialogFragment.show();
             final var data = ((MainActivity)requireActivity()).getViewModel();
-            data.client.register(binding.email.getText().toString(), binding.password.getText().toString(), binding.displayName.getText().toString(), (res, err) -> {
+            data.client.register(current_data.email.getValue(), current_data.password.getValue(), current_data.displayName.getValue(), (res, err) -> {
                 try{
                     data.tokenStore.save(res.getTokens().getAccessToken(), res.getTokens().getRefreshToken());
-                    //todo nav
+                    var nc = NavHostFragment.findNavController(this);
+                    var args = new ChatWebviewFragment.Arguments(res.getUserId(), res.getDisplayName());
+                    var bundle = new Bundle();
+                    bundle.putParcelable("args", args);
+                    nc.navigate(R.id.action_registerFragment_to_chatWebviewFragment, bundle);
                 }
                 catch (Exception e) {
                     binding.result.setText("Register error: " + e.getMessage());
