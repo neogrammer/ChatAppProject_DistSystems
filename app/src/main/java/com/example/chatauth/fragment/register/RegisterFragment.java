@@ -14,8 +14,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.chatauth.MainActivity;
 import com.example.chatauth.R;
 import com.example.chatauth.databinding.FragmentRegisterBinding;
+import com.example.chatauth.fragment.loading.LoadingDialogFragment;
 
 public class RegisterFragment extends Fragment {
 
@@ -25,7 +27,7 @@ public class RegisterFragment extends Fragment {
         binding = FragmentRegisterBinding.inflate(inflater);
         current_data = new ViewModelProvider(this).get(RegisterFragmentViewmodel.class);
         binding.setViewModel(current_data);
-        binding.setLifecycleOwner(this);
+        binding.setLifecycleOwner(getViewLifecycleOwner());
 
         var observer = new TextWatcher() {
             @Override
@@ -43,7 +45,18 @@ public class RegisterFragment extends Fragment {
         binding.password.addTextChangedListener(observer);
         binding.displayName.addTextChangedListener(observer);
         binding.btnRegister.setOnClickListener(v -> {
-            //todo
+            LoadingDialogFragment.show();
+            final var data = ((MainActivity)requireActivity()).getViewModel();
+            data.client.register(binding.email.getText().toString(), binding.password.getText().toString(), binding.displayName.getText().toString(), (res, err) -> {
+                try{
+                    data.tokenStore.save(res.getTokens().getAccessToken(), res.getTokens().getRefreshToken());
+                    //todo nav
+                }
+                catch (Exception e) {
+                    binding.result.setText("Register error: " + e.getMessage());
+                }
+                LoadingDialogFragment.hide();
+            });
         });
 
         return binding.getRoot();
