@@ -15,6 +15,7 @@ export class ChatRoomElement extends LitElement {
         const insert_ref = this.findInsertionElement(message.createdAt);
         const insert_element = ChatRoomElement.protoToElement(message);
         insert_ref === null ? this.prepend(insert_element) : insert_ref.after(insert_element);
+        if(message.userId === window.AndroidBridge.getUserId()) insert_element.classList.add('user');
         return true;
     }
 

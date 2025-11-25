@@ -4,8 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +22,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.webkit.WebViewAssetLoader;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import java.util.ArrayList;
+
+import ink.bluballz.chat.v1.ChatMessage;
 
 public class ChatWebviewOwnerFragment extends Fragment {
     public static final String TAG = "WebviewOwnerFragment";
@@ -57,8 +60,8 @@ public class ChatWebviewOwnerFragment extends Fragment {
             webview.removeJavascriptInterface("AndroidBridge");
         }
         bridge = new AndroidBridge(userId, userName, () -> {
-            for(WithWebviewCallback cb : pending_callbacks) cb.execute(webview);
-            pending_callbacks.clear();
+            for(WithWebviewCallback cb : pending_wv_callbacks) cb.execute(webview);
+            pending_wv_callbacks.clear();
         });
         webview.addJavascriptInterface(bridge, "AndroidBridge");
         webview.loadUrl("https://appassets.androidplatform.net/assets/index.html");
@@ -79,13 +82,13 @@ public class ChatWebviewOwnerFragment extends Fragment {
     // executes callback on the ui thread with the webview after its done loading
     public void withLoadedWebview(WithWebviewCallback callback) {
         if(bridge.getLoaded()) bridge.handler.post(() -> callback.execute(webview));
-        else pending_callbacks.add(callback);
+        else pending_wv_callbacks.add(callback);
     }
 
     private WebView webview;
     private WebViewAssetLoader asset_loader;
     private AndroidBridge bridge;
-    private ArrayList<WithWebviewCallback> pending_callbacks = new ArrayList<>();
+    private final ArrayList<WithWebviewCallback> pending_wv_callbacks = new ArrayList<>();
 
     @FunctionalInterface
     public interface WithWebviewCallback {
@@ -122,6 +125,19 @@ public class ChatWebviewOwnerFragment extends Fragment {
                 loaded = true;
                 loadCb.run();
             });
+        }
+
+        @JavascriptInterface
+        public void postMessage(String b64_msg) {
+            var bytes = Base64.decode(b64_msg, Base64.DEFAULT);
+            ChatMessage msg = null;
+            try {
+                msg = ChatMessage.parseFrom(bytes);
+            } catch (InvalidProtocolBufferException e) {
+                Log.e(TAG, "Failed to parse message: " + e.getMessage());
+                return;
+            }
+            //todo Make the grpc call here
         }
 
         public boolean getLoaded() { return loaded; }

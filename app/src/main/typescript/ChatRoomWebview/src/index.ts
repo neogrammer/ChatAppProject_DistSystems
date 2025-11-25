@@ -8,6 +8,7 @@ declare global {
   const AndroidBridge: IAndroidBridge;
   const WebviewController: IWebviewController;
   const WebviewControllerDecoder: IWebviewControllerDecoder;
+  const DLOG: (val: any) => void;
 
   interface IAndroidBridge {
     getUserName(): string;
@@ -19,6 +20,7 @@ declare global {
 
   interface Window {
     DEBUG: boolean;
+    DLOG: (val: any) => void
     AndroidBridge: IAndroidBridge;
     WebviewController: IWebviewController;
     WebviewControllerDecoder: IWebviewControllerDecoder;
@@ -37,6 +39,8 @@ if(DEBUG) {
     }
   }
 
+  window.DLOG = (val) => console.debug(val);
+
   // const controller = document.querySelector('webview-controller');
   // controller!.addRoom({id: "0", roomName: "Test Room"});
   // controller!.switchToRoom("0");
@@ -45,6 +49,10 @@ if(DEBUG) {
   //   controller!.addMessage(makeDummyMessage("1", "0", "2", "Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message ", "User"));
   // }, 1000);
 
+}
+
+else {
+  window.DLOG = (val) => {}
 }
 
 customElements.whenDefined('webview-controller').then(() => {

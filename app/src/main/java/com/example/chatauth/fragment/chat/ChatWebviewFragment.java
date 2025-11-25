@@ -46,29 +46,24 @@ public class ChatWebviewFragment extends Fragment implements IWebviewController 
         if(args_obj.userId == null || args_obj.userId.isBlank()) throw new RuntimeException("Can't construct chat webview without userId!");
         if(args_obj.userName == null || args_obj.userName.isBlank()) throw new RuntimeException("Can't construct chat webview without userName!");
         webview_owner.load(args_obj.userId, args_obj.userName);
-        webview_owner.withLoadedWebview(webview -> {
-            addRoom(ChatRoom.newBuilder().setId("0").setRoomName("TestRoom").build(), v -> {
-                switchToRoom("0", null);
-                addMessage(ChatMessage.newBuilder()
-                        .setId("0")
-                        .setContent("Hello World!")
-                        .setCreatedAt(Instant.now().toEpochMilli())
-                        .setRoomId("0")
-                        .setUserId(args_obj.userId)
-                        .setUserName(args_obj.userName)
-                        .build(), null);
-                addMessage(ChatMessage.newBuilder()
-                        .setId("1")
-                        .setContent("Hi World!")
-                        .setCreatedAt(Instant.now().toEpochMilli())
-                        .setRoomId("0")
-                        .setUserId("123")
-                        .setUserName("Other user")
-                        .build(), null);
-            });
-
-        });
-
+//        addRoom(ChatRoom.newBuilder().setId("0").setRoomName("TestRoom").build(), v -> {
+//            addMessage(ChatMessage.newBuilder()
+//                    .setId("0")
+//                    .setContent("Hello World!")
+//                    .setCreatedAt(Instant.now().toEpochMilli())
+//                    .setRoomId("0")
+//                    .setUserId(args_obj.userId)
+//                    .setUserName(args_obj.userName)
+//                    .build(), null);
+//            addMessage(ChatMessage.newBuilder()
+//                    .setId("1")
+//                    .setContent("Hi World!")
+//                    .setCreatedAt(Instant.now().toEpochMilli())
+//                    .setRoomId("0")
+//                    .setUserId("123")
+//                    .setUserName("Other user")
+//                    .build(), null);
+//        });
     }
 
     @Override

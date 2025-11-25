@@ -24,10 +24,6 @@ export class ChatMessageElement extends LitElement {
         }
     }
 
-    protected override firstUpdated(_changedProperties: PropertyValues): void {
-        if(this.senderId == window.AndroidBridge?.getUserId()) this.classList.add("user"); //todo move to ctor/elsewhere
-    }
-
     protected override render() {
         return html`
             <div id="header">

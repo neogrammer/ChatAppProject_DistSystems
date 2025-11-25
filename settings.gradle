@@ -6,10 +6,21 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
         google()
         mavenCentral()
+        ivy {
+            name = "Node.js"
+            url = uri("https://nodejs.org/dist/")
+            patternLayout {
+                // Matches files like: v20.11.1/node-v20.11.1-win-x64.zip
+                artifact("v[revision]/node-v[revision]-[classifier].[ext]")
+            }
+            metadataSources {
+                artifact()  // Node.js doesn't provide ivy/maven metadata
+            }
+        }
     }
 }
 rootProject.name = "ChatAuthApp"
