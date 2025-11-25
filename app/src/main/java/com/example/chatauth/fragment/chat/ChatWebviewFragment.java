@@ -46,6 +46,8 @@ public class ChatWebviewFragment extends Fragment implements IWebviewController 
         if(args_obj.userId == null || args_obj.userId.isBlank()) throw new RuntimeException("Can't construct chat webview without userId!");
         if(args_obj.userName == null || args_obj.userName.isBlank()) throw new RuntimeException("Can't construct chat webview without userName!");
         webview_owner.load(args_obj.userId, args_obj.userName);
+        addRoom(ChatRoom.newBuilder().setId("main").setRoomName("Anonymous").build(), null);
+
 //        addRoom(ChatRoom.newBuilder().setId("0").setRoomName("TestRoom").build(), v -> {
 //            addMessage(ChatMessage.newBuilder()
 //                    .setId("0")
