@@ -28,6 +28,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         const room_element = document.createElement('chat-room');
         room_element.name = room.roomName;
         this._rooms.set(room.id, room_element);
+        if(this._rooms.size === 1) this.switchToRoom(room.id);
         return true;
     }
 
