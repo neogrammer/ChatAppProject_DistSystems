@@ -1,7 +1,28 @@
 plugins {
     id 'com.android.application'
     id 'com.google.protobuf' version '0.9.4'  // only if you keep .proto in this module
+    id "com.github.node-gradle.node" version "7.0.2"
 }
+
+def webDir = file("$projectDir/src/main/typescript/ChatRoomWebview")
+
+node {
+    version = "20.11.1"
+    npmVersion = "10.5.2"
+    download = true
+    workDir = file("$projectDir/.node")
+    npmWorkDir = file("$projectDir/.npm")
+    nodeProjectDir = webDir         // File, not GString
+    distBaseUrl = "https://nodejs.org/dist/"
+}
+
+tasks.register("npmBuildDebug", com.github.gradle.node.npm.task.NpmTask) {
+    dependsOn("npmInstall")
+    workingDir = webDir             // File object
+    args = ["run", "build:debug"]
+}
+
+preBuild.dependsOn("npmBuildDebug")
 
 android {
     namespace "com.example.chatauth"
