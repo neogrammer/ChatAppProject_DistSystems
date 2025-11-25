@@ -59,7 +59,7 @@ public class RegisterFragment extends Fragment {
                     nc.navigate(R.id.action_registerFragment_to_chatWebviewFragment, bundle);
                 }
                 catch (Exception e) {
-                    binding.result.setText("Register error: " + e.getMessage());
+                    binding.result.setText("Register error: " + e.getMessage() + "; " + err.getMessage());
                 }
                 LoadingDialogFragment.hide();
             });

@@ -84,6 +84,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui:2.9.6'
     implementation 'androidx.fragment:fragment:1.8.9'
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+    implementation "com.google.android.material:material:1.12.0"
 }
 
 // Only keep this protobuf block if your Android module owns the .proto.
