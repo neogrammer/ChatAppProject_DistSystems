@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -14,8 +15,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.chatauth.MainActivity;
 import com.example.chatauth.R;
 import com.example.chatauth.databinding.FragmentRegisterBinding;
+import com.example.chatauth.fragment.chat.ChatWebviewFragment;
+import com.example.chatauth.fragment.loading.LoadingDialogFragment;
 
 public class RegisterFragment extends Fragment {
 
@@ -25,7 +29,7 @@ public class RegisterFragment extends Fragment {
         binding = FragmentRegisterBinding.inflate(inflater);
         current_data = new ViewModelProvider(this).get(RegisterFragmentViewmodel.class);
         binding.setViewModel(current_data);
-        binding.setLifecycleOwner(this);
+        binding.setLifecycleOwner(getViewLifecycleOwner());
 
         var observer = new TextWatcher() {
             @Override
@@ -43,7 +47,22 @@ public class RegisterFragment extends Fragment {
         binding.password.addTextChangedListener(observer);
         binding.displayName.addTextChangedListener(observer);
         binding.btnRegister.setOnClickListener(v -> {
-            //todo
+            LoadingDialogFragment.show();
+            final var data = ((MainActivity)requireActivity()).getViewModel();
+            data.client.register(current_data.email.getValue(), current_data.password.getValue(), current_data.displayName.getValue(), (res, err) -> {
+                try{
+                    data.tokenStore.save(res.getTokens().getAccessToken(), res.getTokens().getRefreshToken());
+                    var nc = NavHostFragment.findNavController(this);
+                    var args = new ChatWebviewFragment.Arguments(res.getUserId(), res.getDisplayName());
+                    var bundle = new Bundle();
+                    bundle.putParcelable("args", args);
+                    nc.navigate(R.id.action_registerFragment_to_chatWebviewFragment, bundle);
+                }
+                catch (Exception e) {
+                    binding.result.setText("Register error: " + e.getMessage());
+                }
+                LoadingDialogFragment.hide();
+            });
         });
 
         return binding.getRoot();
