@@ -40,9 +40,9 @@ public class LoginFragment extends Fragment {
         // Inflate the layout for this fragment
         binding = FragmentLoginBinding.inflate(inflater);
 
-        tokenStore = new TokenStore(requireContext());
-        client = new AuthClientSample();
-        client.connect(HOST, PORT);
+//        tokenStore = new TokenStore(requireContext());
+//        client = new AuthClientSample();
+//        client.connect(HOST, PORT);
 
 //        binding.btnRegister.setOnClickListener(v -> {
 //            LoadingDialogFragment.show();

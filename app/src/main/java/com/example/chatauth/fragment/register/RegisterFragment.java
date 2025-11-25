@@ -52,7 +52,7 @@ public class RegisterFragment extends Fragment {
     private FragmentRegisterBinding binding;
     private RegisterFragmentViewmodel current_data;
 
-    private static class RegisterFragmentViewmodel extends ViewModel {
+    public static class RegisterFragmentViewmodel extends ViewModel {
         public RegisterFragmentViewmodel(SavedStateHandle state_handle) {
             super();
             email = state_handle.getLiveData("rf_email", "");
