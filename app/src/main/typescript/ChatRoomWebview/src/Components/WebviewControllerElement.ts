@@ -70,6 +70,10 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
             DLOG("[WebviewControllerElement] Failed to add message because argument was nullish!");
             return false;
         }
+        if(this._sentIds.has(message.id)) {
+            DLOG("[WebviewControllerElement] Skipping duplicate user message!");
+            return false;
+        }
         const room_id = message.roomId;
         const room = this._rooms.get(room_id);
         if(!room) {
@@ -178,6 +182,8 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
     @query("#msg_input", true)
     private _input!: HTMLInputElement;
 
+    private _sentIds = new Set<string>();
+
     private _onSend() {
         if(!this._input.value || this._input.value.length === 0) return;
         const message: ChatMessage = {
@@ -193,10 +199,11 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
 
         if(!room) {
             DLOG(`[WebviewControllerElement] Failed to send message because roomId '${this.current_room}' no longer exists!`);
+            return;
         }
 
         if(!room!.addMessage(message)) return;
-
+        this._sentIds.add(message.id);
         const encoded = ChatMessage.encode(message).finish();
         window.AndroidBridge.postMessage(btoa(String.fromCharCode(...encoded)));
     }
