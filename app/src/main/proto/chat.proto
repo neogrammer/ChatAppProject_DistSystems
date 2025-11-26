@@ -17,3 +17,14 @@ message ChatRoom {
   string id = 1;
   string roomName = 2;
 }
+
+message ChatMessageHistoryRequest {
+  string roomId = 1;
+  string userId = 2;
+  int64 minTime = 3;
+  int64 maxTime = 4;
+}
+
+message ChatMessageHistoryResponse {
+  repeated ChatMessage messages = 1;
+}

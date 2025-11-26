@@ -24,14 +24,16 @@ import androidx.webkit.WebViewAssetLoader;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import ink.bluballz.chat.v1.ChatMessage;
+import ink.bluballz.chat.v1.ChatMessageHistoryRequest;
 
 public class ChatWebviewOwnerFragment extends Fragment {
     public static final String TAG = "WebviewOwnerFragment";
 
-    public void load(String userId, String userName) {
+    public void load(String userId, String userName, ChatWebviewFragment controller) {
         if (webview == null) {
             Context ctx = requireContext().getApplicationContext();
             asset_loader = new WebViewAssetLoader.Builder()
@@ -59,10 +61,10 @@ public class ChatWebviewOwnerFragment extends Fragment {
             if(bridge.userId.equals(userId) && bridge.userName.equals(userName)) return;
             webview.removeJavascriptInterface("AndroidBridge");
         }
-        bridge = new AndroidBridge(userId, userName, () -> {
+        bridge = new AndroidBridge(userId, userName,  () -> {
             for(WithWebviewCallback cb : pending_wv_callbacks) cb.execute(webview);
             pending_wv_callbacks.clear();
-        });
+        }, controller);
         webview.addJavascriptInterface(bridge, "AndroidBridge");
         webview.loadUrl("https://appassets.androidplatform.net/assets/index.html");
     }
@@ -101,11 +103,13 @@ public class ChatWebviewOwnerFragment extends Fragment {
 
         private boolean loaded = false;
         private final Runnable loadCb;
+        private final WeakReference<ChatWebviewFragment> controller;
 
-        public AndroidBridge(String userId, String userName, Runnable loadCb) {
+        public AndroidBridge(String userId, String userName, Runnable loadCb, ChatWebviewFragment controller) {
             this.userId = userId;
             this.userName = userName;
             this.loadCb = loadCb;
+            this.controller = new WeakReference<>(controller);
         }
 
         @JavascriptInterface
@@ -138,6 +142,20 @@ public class ChatWebviewOwnerFragment extends Fragment {
                 return;
             }
             //todo Make the grpc call here
+        }
+
+        @JavascriptInterface
+        public void requestMessageHistory(String b64_req) {
+            var bytes = Base64.decode(b64_req, Base64.DEFAULT);
+            ChatMessageHistoryRequest req = null;
+            try {
+                req = ChatMessageHistoryRequest.parseFrom(bytes);
+            } catch (InvalidProtocolBufferException e) {
+                Log.e(TAG, "Failed to parse message history request: " + e.getMessage());
+                return;
+            }
+            //todo Make the grpc call here. use the UIStreamResponse for the async callback and
+            // call controller.get().AddMessages(), or make an error dialog (in progress) on error
         }
 
         public boolean getLoaded() { return loaded; }
