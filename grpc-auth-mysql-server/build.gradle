@@ -1,0 +1,59 @@
+plugins {
+  id 'java'
+  id 'com.google.protobuf' version '0.9.4'
+  id 'application'
+  id 'com.gradleup.shadow' version '8.3.8'
+}
+
+repositories { mavenCentral() }
+
+def grpcVersion = '1.64.0'
+
+dependencies {
+  implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
+  implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+  implementation "io.grpc:grpc-stub:${grpcVersion}"
+
+  implementation 'com.zaxxer:HikariCP:5.1.0'
+  implementation 'com.mysql:mysql-connector-j:8.4.0'
+
+  implementation 'org.mindrot:jbcrypt:0.4'
+  implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+  runtimeOnly   'io.jsonwebtoken:jjwt-impl:0.11.5'
+  runtimeOnly   'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+  compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
+  testImplementation 'junit:junit:4.13.2'
+}
+
+java {
+  toolchain { languageVersion = JavaLanguageVersion.of(17) }
+}
+
+application {
+  mainClass = 'ink.bluballz.chat.auth.server.Main'
+}
+
+protobuf {
+  protoc { artifact = 'com.google.protobuf:protoc:3.25.3' }
+  plugins {
+    grpc { artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" }
+  }
+  generateProtoTasks {
+    all().each { task ->
+      task.plugins { grpc {} }
+      task.builtins { java {} }
+    }
+  }
+}
+
+tasks.register('copyDockerResources', Copy) {
+    from('db') { include '**/*' }
+    into("$buildDir/docker/db")
+}
+
+tasks.named('shadowJar') {
+  archiveBaseName.set('auth-service')
+  archiveClassifier.set('all')
+  dependsOn 'copyDockerResources'
+}

@@ -1,0 +1,38 @@
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: 'chatapp_users'
+      MYSQL_ROOT_PASSWORD: 'chatapp1qa2ws#ED'
+      MYSQL_USER: 'admin'
+      MYSQL_PASSWORD: 'pass0!QAZ'
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD","mysqladmin","ping","-h","127.0.0.1","-u","root","-pchatapp1qa2ws#ED"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  auth-server:
+    build: .
+    restart: unless-stopped
+    environment:
+      PORT: 50051
+      DB_URL: jdbc:mysql://mysql:3306/chatapp_users?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USER: 'admin'
+      DB_PASSWORD: 'pass0!QAZ'
+      JWT_SECRET: supersecret_superlong_at_least_32_chars__devonly
+      JWT_SECRET_FORMAT: PLAIN
+      ACCESS_MINUTES: 15
+      REFRESH_DAYS: 7
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "55101:50051"
+
+volumes:
+  mysql_data:
