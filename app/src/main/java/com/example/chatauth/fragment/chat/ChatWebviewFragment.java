@@ -30,8 +30,7 @@ import java.util.Objects;
 import ink.bluballz.chat.v1.ChatMessage;
 import ink.bluballz.chat.v1.ChatRoom;
 
-//todo onPostMessage
-public class ChatWebviewFragment extends Fragment implements IWebviewController {
+public class ChatWebviewFragment extends Fragment /*implements IWebviewController*/ {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,25 +46,6 @@ public class ChatWebviewFragment extends Fragment implements IWebviewController 
         if(args_obj.userName == null || args_obj.userName.isBlank()) throw new RuntimeException("Can't construct chat webview without userName!");
         webview_owner.load(args_obj.userId, args_obj.userName);
         addRoom(ChatRoom.newBuilder().setId("main").setRoomName("Anonymous").build(), null);
-
-//        addRoom(ChatRoom.newBuilder().setId("0").setRoomName("TestRoom").build(), v -> {
-//            addMessage(ChatMessage.newBuilder()
-//                    .setId("0")
-//                    .setContent("Hello World!")
-//                    .setCreatedAt(Instant.now().toEpochMilli())
-//                    .setRoomId("0")
-//                    .setUserId(args_obj.userId)
-//                    .setUserName(args_obj.userName)
-//                    .build(), null);
-//            addMessage(ChatMessage.newBuilder()
-//                    .setId("1")
-//                    .setContent("Hi World!")
-//                    .setCreatedAt(Instant.now().toEpochMilli())
-//                    .setRoomId("0")
-//                    .setUserId("123")
-//                    .setUserName("Other user")
-//                    .build(), null);
-//        });
     }
 
     @Override
@@ -85,81 +65,13 @@ public class ChatWebviewFragment extends Fragment implements IWebviewController 
         });
     }
 
-    @Override
+//    @Override
     public void addRoom(ChatRoom room, @Nullable JSCallback<Boolean> callback) {
         webview_owner.withLoadedWebview(webview -> {
             String js = "window.WebviewController.addRoom("
                     + "window.WebviewControllerDecoder.decodeChatRoom("
                     + jsBase64Arg(room)
                     + "))";
-
-            webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
-        });
-    }
-
-    @Override
-    public void removeRoom(String roomId, @Nullable JSCallback<Boolean> callback) {
-        webview_owner.withLoadedWebview(webview -> {
-            String js = "window.WebviewController.removeRoom(" + jsString(roomId) + ")";
-            webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
-        });
-    }
-
-    @Override
-    public void switchToRoom(String roomId, @Nullable JSCallback<Boolean> callback) {
-        webview_owner.withLoadedWebview(webview -> {
-            String js = "window.WebviewController.switchToRoom(" + jsString(roomId) + ")";
-            webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
-        });
-    }
-
-    @Override
-    public void addMessage(ChatMessage message, @Nullable JSCallback<Boolean> callback) {
-        webview_owner.withLoadedWebview(webview -> {
-            String js = "window.WebviewController.addMessage("
-                    + "window.WebviewControllerDecoder.decodeChatMessage("
-                    + jsBase64Arg(message)
-                    + "))";
-
-            webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
-        });
-    }
-
-    @Override
-    public void addMessages(@Nullable JSCallback<Boolean> callback, ChatMessage... messages) {
-        if (messages.length == 0) return;
-        webview_owner.withLoadedWebview(webview -> {
-            String js = "window.WebviewController.addMessages(" + jsListOfBase64(messages) + ")";
-            webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
-        });
-    }
-
-    @Override
-    public void removeMessage(String messageId, String roomId, @Nullable JSCallback<Boolean> callback) {
-        webview_owner.withLoadedWebview(webview -> {
-            String js = "window.WebviewController.removeMessage("
-                    + jsString(messageId) + ", " + jsString(roomId) + ")";
-
-            webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
-        });
-    }
-
-    @Override
-    public void removeMessages(@Nullable JSCallback<Boolean> callback, RemoveMessageTuple... messages) {
-        if (messages.length == 0) return;
-        webview_owner.withLoadedWebview(webview -> {
-            String js = "window.WebviewController.removeMessages(" + jsRemoveTupleList(messages) + ")";
-            webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
-        });
-    }
-
-    @Override
-    public void hasMessage(String messageId, @Nullable String roomId, @Nullable JSCallback<Boolean> callback) {
-        webview_owner.withLoadedWebview(webview -> {
-            String js = "window.WebviewController.hasMessage("
-                    + jsString(messageId) + ","
-                    + (roomId == null ? "null" : jsString(roomId))
-                    + ")";
 
             webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
         });
