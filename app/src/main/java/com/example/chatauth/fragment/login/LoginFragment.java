@@ -62,7 +62,7 @@ public class LoginFragment extends Fragment {
                     nc.navigate(R.id.action_loginFragment_to_chatWebviewFragment, bundle);
                 }
                 catch (Exception e) {
-                    binding.result.setText("Login error: " + e.getMessage());
+                    binding.result.setText("Login error: " + e.getMessage() + "; Auth error: " + err.getMessage());
                 }
                 LoadingDialogFragment.hide();
             });
