@@ -1,4 +1,7 @@
 syntax = "proto3";
+
+package chat;
+
 option java_multiple_files = true;
 option java_package = "ink.bluballz.chat.v1";
 option java_outer_classname = "ChatProto";
@@ -16,4 +19,12 @@ message ChatMessage {
 message ChatRoom {
   string id = 1;
   string roomName = 2;
+}
+
+message SendMessageResponse {
+  bool success = 1;
+}
+
+service ChatService {
+  rpc SendMessage(ChatMessage) returns (SendMessageResponse);
 }

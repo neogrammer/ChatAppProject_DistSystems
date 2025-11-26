@@ -17,7 +17,7 @@ namespace _3420_Chat_Service.Services
             _hubContext = hubContext;
             _logger = logger;
             
-            var authServerUrl = configuration["AuthServer:Url"] ?? "http://auth-server:55101";
+            var authServerUrl = configuration["AuthServer:Url"] ?? "http://24.236.104.52r:55101";
             var channel = GrpcChannel.ForAddress(authServerUrl);
             _authClient = new AuthService.AuthServiceClient(channel);
         }
@@ -36,10 +36,10 @@ namespace _3420_Chat_Service.Services
                 var token = authHeader.Substring(7);
                 var authRequest = new ValidateTokenRequest { Token = token };
                 var authResponse = await _authClient.ValidateTokenAsync(authRequest);
-                
+
                 if (!authResponse.Valid)
                 {
-                    _logger.LogWarning("Invalid token provided");
+                     _logger.LogWarning("Invalid token provided");
                     return new SendMessageResponse { Success = false };
                 }
 

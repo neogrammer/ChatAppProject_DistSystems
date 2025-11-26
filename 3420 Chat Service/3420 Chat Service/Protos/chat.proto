@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-option csharp_namespace = "_3420_Chat_Service";
-
 package chat;
+
+option csharp_namespace = "_3420_Chat_Service";
 
 message ChatMessage {
   string id        = 1;  // stringified DB id
