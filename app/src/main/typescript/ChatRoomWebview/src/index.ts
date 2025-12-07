@@ -1,6 +1,6 @@
 ﻿import "./Components/WebviewControllerElement"
-import { ChatMessage, ChatRoom, MessageFns } from "./Generated/chat";
-import { IWebviewController, IWebviewControllerDecoder } from "./Interfaces/IWebviewController";
+import { ChatMessage, ChatMessageHistoryRequest, ChatMessageHistoryResponse, ChatRoom, MessageFns } from "./Generated/chat";
+import { IWebviewController, IWebviewControllerDecoder, IWebviewControllerEncoder } from "./Interfaces/IWebviewController";
 import * as signalR from "@microsoft/signalr";
 import "./base.css";
 
@@ -9,6 +9,7 @@ declare global {
   const AndroidBridge: IAndroidBridge;
   const WebviewController: IWebviewController;
   const WebviewControllerDecoder: IWebviewControllerDecoder;
+  const WebviewControllerEncoder: IWebviewControllerEncoder;
   const DLOG: (val: any) => void;
 
   interface IAndroidBridge {
@@ -16,7 +17,12 @@ declare global {
     getUserId(): string;
 
     setLoaded(): void;
-    postMessage(b64: string): void;
+
+    // use WebviewControllerEncoder.encodeChatMessage(message) to convert ChatMessage to base64
+    postMessage(ChatMessage_b64: string): void;
+
+    // use WebviewControllerEncoder.encodeChatMessageHistoryRequest(request) to convert ChatMessageHistoryRequest to base64
+    requestMessageHistory(ChatMessageHistoryRequest_b64: string): void;
   }
 
   interface Window {
@@ -25,6 +31,7 @@ declare global {
     AndroidBridge: IAndroidBridge;
     WebviewController: IWebviewController;
     WebviewControllerDecoder: IWebviewControllerDecoder;
+    WebviewControllerEncoder: IWebviewControllerEncoder;
   }
 }
 
@@ -88,6 +95,20 @@ customElements.whenDefined('webview-controller').then(() => {
     },
     decodeChatRoom(b64) {
       return ChatRoom.decode(this.toByteArray(b64));
+    },
+    decodeChatMessageHistoryRequestResponse(b64: string) { 
+      return ChatMessageHistoryResponse.decode(this.toByteArray(b64)).messages;
+    }
+  }
+  window["WebviewControllerEncoder"] = { 
+    encodeChatMessage(message: ChatMessage) {
+      return btoa(String.fromCharCode(...ChatMessage.encode(message).finish()));
+    },
+    encodeChatRoom(room: ChatRoom) {
+      return btoa(String.fromCharCode(...ChatRoom.encode(room).finish()));
+    },
+    encodeChatMessageHistoryRequest(request: ChatMessageHistoryRequest) {
+      return btoa(String.fromCharCode(...ChatMessageHistoryRequest.encode(request).finish()));
     },
   }
 
