@@ -21,6 +21,15 @@ message ChatRoom {
   string roomName = 2;
 }
 
+message ChatMessageHistoryRequest {
+  string roomId = 1;
+  string userId = 2;
+  int64 minTime = 3;
+  int64 maxTime = 4;
+}
+
+message ChatMessageHistoryResponse {
+  repeated ChatMessage messages = 1;
 message SendMessageResponse {
   bool success = 1;
 }
