@@ -26,6 +26,7 @@ message ChatMessageHistoryRequest {
   string userId = 2;
   int64 minTime = 3;
   int64 maxTime = 4;
+  int64 maxMessages = 5;
 }
 
 message ChatMessageHistoryResponse {
