@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS users (
+  id              BIGINT PRIMARY KEY AUTO_INCREMENT,
+  email           VARCHAR(255) NOT NULL UNIQUE,
+  display_name    VARCHAR(100) NOT NULL,
+  password_hash   VARCHAR(100) NOT NULL,
+  refresh_hash    CHAR(64) NULL,
+  refresh_expires DATETIME NULL,
+  created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

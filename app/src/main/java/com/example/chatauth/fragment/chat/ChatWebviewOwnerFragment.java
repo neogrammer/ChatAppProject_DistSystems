@@ -22,6 +22,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.webkit.WebViewAssetLoader;
 
+import com.example.chatauth.MainActivity;
+import com.example.chatauth.chat.ChatClient;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.lang.ref.WeakReference;
@@ -32,6 +34,10 @@ import ink.bluballz.chat.v1.ChatMessageHistoryRequest;
 
 public class ChatWebviewOwnerFragment extends Fragment {
     public static final String TAG = "WebviewOwnerFragment";
+    private static final String CHAT_SERVICE_HOST = "10.0.2.2"; // emulator to PC
+    private static final int CHAT_SERVICE_PORT = 5065;
+
+    private ChatClient chatClient;
 
     public void load(String userId, String userName, ChatWebviewFragment controller) {
         if (webview == null) {
@@ -39,8 +45,9 @@ public class ChatWebviewOwnerFragment extends Fragment {
             asset_loader = new WebViewAssetLoader.Builder()
                     .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(ctx))
                     .build();
-            webview = new WebView(ctx); // use application context to prevent leaking the activity on config changes
+            webview = new WebView(ctx);
             webview.getSettings().setJavaScriptEnabled(true);
+            webview.getSettings().setMixedContentMode(android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
             webview.setWebViewClient(new WebViewClient() {
                 @Nullable
                 @Override
@@ -61,7 +68,7 @@ public class ChatWebviewOwnerFragment extends Fragment {
             if(bridge.userId.equals(userId) && bridge.userName.equals(userName)) return;
             webview.removeJavascriptInterface("AndroidBridge");
         }
-        bridge = new AndroidBridge(userId, userName,  () -> {
+        bridge = new AndroidBridge(userId, userName, chatClient, this, () -> {
             for(WithWebviewCallback cb : pending_wv_callbacks) cb.execute(webview);
             pending_wv_callbacks.clear();
         }, controller);
@@ -73,6 +80,17 @@ public class ChatWebviewOwnerFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+
+        chatClient = new ChatClient();
+        chatClient.connect(CHAT_SERVICE_HOST, CHAT_SERVICE_PORT);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (chatClient != null) {
+            chatClient.shutdown();
+        }
     }
 
     @Nullable
@@ -100,14 +118,18 @@ public class ChatWebviewOwnerFragment extends Fragment {
     private static class AndroidBridge {
         private final String userId;
         private final String userName;
+        private final ChatClient chatClient;
+        private final ChatWebviewOwnerFragment fragment;
 
         private boolean loaded = false;
         private final Runnable loadCb;
         private final WeakReference<ChatWebviewFragment> controller;
 
-        public AndroidBridge(String userId, String userName, Runnable loadCb, ChatWebviewFragment controller) {
+        public AndroidBridge(String userId, String userName, ChatClient chatClient, ChatWebviewOwnerFragment fragment, Runnable loadCb, ChatWebviewFragment controller) {
             this.userId = userId;
             this.userName = userName;
+            this.chatClient = chatClient;
+            this.fragment = fragment;
             this.loadCb = loadCb;
             this.controller = new WeakReference<>(controller);
         }
@@ -141,7 +163,27 @@ public class ChatWebviewOwnerFragment extends Fragment {
                 Log.e(TAG, "Failed to parse message: " + e.getMessage());
                 return;
             }
-            //todo Make the grpc call here
+
+            // get access token
+            String accessToken;
+            try {
+                var viewModel = ((MainActivity)fragment.requireActivity()).getViewModel();
+                accessToken = viewModel.tokenStore.access();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to get access token: " + e.getMessage());
+                return;
+            }
+
+            // send message via grpc
+            chatClient.sendMessage(msg, accessToken, (response, error) -> {
+                if (error != null) {
+                    Log.e(TAG, "Failed to send message: " + error.getMessage());
+                } else if (response != null && response.getSuccess()) {
+                    Log.d(TAG, "Message sent successfully");
+                } else {
+                    Log.w(TAG, "Message send failed");
+                }
+            });
         }
 
         @JavascriptInterface

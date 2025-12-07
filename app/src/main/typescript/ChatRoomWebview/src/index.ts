@@ -1,6 +1,7 @@
 ﻿import "./Components/WebviewControllerElement"
 import { ChatMessage, ChatRoom, MessageFns } from "./Generated/chat";
 import { IWebviewController, IWebviewControllerDecoder } from "./Interfaces/IWebviewController";
+import * as signalR from "@microsoft/signalr";
 import "./base.css";
 
 declare global {
@@ -89,6 +90,36 @@ customElements.whenDefined('webview-controller').then(() => {
       return ChatRoom.decode(this.toByteArray(b64));
     },
   }
+
+  const CHAT_SERVICE_URL = "http://10.0.2.2:5066";
+  const ROOM_ID = "main";
+
+  // setup signalr connection
+  const connection = new signalR.HubConnectionBuilder()
+    .withUrl(`${CHAT_SERVICE_URL}/chathub`)
+    .withAutomaticReconnect()
+    .build();
+
+  // handle incoming messages
+  connection.on("ReceiveMessage", (message: ChatMessage) => {
+    DLOG("received message via signalr");
+    DLOG(message);
+    window.WebviewController.addMessage(message);
+  });
+
+  // connect and join room
+  connection.start()
+    .then(() => {
+      DLOG("signalr connected");
+      return connection.invoke("JoinGroup", ROOM_ID);
+    })
+    .then(() => {
+      DLOG(`joined room: ${ROOM_ID}`);
+    })
+    .catch(err => {
+      console.error("signalr connection error:", err);
+    });
+
   AndroidBridge.setLoaded();
 })
 

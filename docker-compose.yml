@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: chat-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - chat-network
+
+  chat-service:
+    build:
+      context: ./3420 Chat Service
+      dockerfile: Dockerfile
+    container_name: chat-service
+    environment:
+      AuthServer__Url: "http://24.236.104.52:55101"
+      ASPNETCORE_URLS: "http://+:5065;http://+:5066"
+      ConnectionStrings__Redis: "redis:6379"
+    ports:
+      - "5065:5065"
+      - "5066:5066"
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - chat-network
+
+volumes:
+  redis_data:
+
+networks:
+  chat-network:
+    driver: bridge
