@@ -30,6 +30,8 @@ message ChatMessageHistoryRequest {
 
 message ChatMessageHistoryResponse {
   repeated ChatMessage messages = 1;
+}
+
 message SendMessageResponse {
   bool success = 1;
 }
