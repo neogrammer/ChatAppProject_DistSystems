@@ -1,4 +1,4 @@
-import { ChatMessage, ChatRoom } from "../Generated/chat";
+import { ChatMessage, ChatMessageHistoryRequest, ChatRoom } from "../Generated/chat";
 import { IChatMessage } from "./IChatMessage";
 import { IChatRoom } from "./IChatRoom";
 import type { IElementConvertable } from "./IElementConvertable";
@@ -22,5 +22,12 @@ export interface IWebviewController extends IElementConvertable {
 export interface IWebviewControllerDecoder {
     decodeChatRoom(b64: string): ChatRoom;
     decodeChatMessage(b64: string): ChatMessage;
+    decodeChatMessageHistoryRequestResponse(b64: string): ChatMessage[];
     toByteArray(b64: string): Uint8Array;
+}
+
+export interface IWebviewControllerEncoder { 
+    encodeChatRoom(room: ChatRoom): string;
+    encodeChatMessage(message: ChatMessage): string;
+    encodeChatMessageHistoryRequest(request: ChatMessageHistoryRequest): string;
 }
