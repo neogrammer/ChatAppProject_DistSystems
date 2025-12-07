@@ -47,30 +47,34 @@ if(DEBUG) {
     }
   }
 
-  // window.AndroidBridge = {
-  //   getUserId() {
-  //     return "0"
-  //   },
-  //   getUserName() {
-  //     return "Tyler"
-  //   },
-  //   postMessage(b64) {
+  window.AndroidBridge ??= {
+    getUserId() {
+      return "0"
+    },
+    getUserName() {
+      return "Tyler"
+    },
+    postMessage(b64) {
       
-  //   },
-  //   setLoaded() {
+    },
+    setLoaded() {
       
-  //   },
-  // }
+    },
+    requestMessageHistory(ChatMessageHistoryRequest_b64) {
+      
+    },
+  }
 
   window.DLOG = (val) => console.debug(val);
 
-  // const controller = document.querySelector('webview-controller');
-  // controller!.addRoom({id: "0", roomName: "Test Room"});
-  // //controller!.switchToRoom("0");
-  // controller!.addMessage(makeDummyMessage("0", "0", "0", "Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message ", "Tyler"));
-  // setTimeout(() => {
-  //   controller!.addMessage(makeDummyMessage("1", "0", "2", "Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message ", "User"));
-  // }, 1000);
+  const controller = document.querySelector('webview-controller');
+  controller!.addRoom({id: "main", roomName: "Anonymous"});
+  controller!.addRoom({id: "second", roomName: "Second Room"});
+  //controller!.switchToRoom("0");
+  controller!.addMessage(makeDummyMessage("0", "main", "0", "Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message ", "Tyler"));
+  setTimeout(() => {
+    controller!.addMessage(makeDummyMessage("1", "main", "2", "Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message ", "User"));
+  }, 1000);
   
 }
 
