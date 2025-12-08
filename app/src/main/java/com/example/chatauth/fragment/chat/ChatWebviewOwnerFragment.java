@@ -154,9 +154,13 @@ public class ChatWebviewOwnerFragment extends Fragment {
             });
         }
 
-        public void showLoadingDialog() { handler.post(LoadingDialogFragment::show); }
+        public void showLoadingDialog() {
+            LoadingDialogFragment.show();
+        }
 
-        public void hideLoadingDialog() { handler.post(LoadingDialogFragment::hide); }
+        public void hideLoadingDialog() {
+            LoadingDialogFragment.hide();
+        }
 
 
         @JavascriptInterface
