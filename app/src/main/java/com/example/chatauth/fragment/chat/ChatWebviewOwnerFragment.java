@@ -24,6 +24,7 @@ import androidx.webkit.WebViewAssetLoader;
 
 import com.example.chatauth.MainActivity;
 import com.example.chatauth.chat.ChatClient;
+import com.example.chatauth.fragment.loading.LoadingDialogFragment;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.lang.ref.WeakReference;
@@ -152,6 +153,15 @@ public class ChatWebviewOwnerFragment extends Fragment {
                 loadCb.run();
             });
         }
+
+        public void showLoadingDialog() {
+            LoadingDialogFragment.show();
+        }
+
+        public void hideLoadingDialog() {
+            LoadingDialogFragment.hide();
+        }
+
 
         @JavascriptInterface
         public void postMessage(String b64_msg) {
