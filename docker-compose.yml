@@ -27,22 +27,14 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chatuser -d chatapp_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - chat-network
 
-  db-migrate:
-    build:
-      context: ./3420 Chat Service
-      dockerfile: Dockerfile
-    container_name: db-migrate
-    environment:
-      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=chatapp_db;Username=chatuser;Password=chatpass"
-    command: ["dotnet", "ef", "database", "update"]
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - chat-network
 
   chat-service:
     build:
@@ -59,7 +51,7 @@ services:
       - "5066:5066"
     depends_on:
       - redis
-      - db-migrate
+      - postgres
     restart: unless-stopped
     networks:
       - chat-network
