@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         public final AuthClientSample client;
         public final TokenStore tokenStore;
 
-        private static final String HOST = "24.236.104.52"; // emulator-to-PC
+        private static final String HOST = "10.0.2.2"; // emulator-to-PC
         private static final int    PORT = 55101;      // your compose mapping (55101->50051)
 
         public MainActivityViewmodel() {
