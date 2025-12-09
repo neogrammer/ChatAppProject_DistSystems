@@ -1,6 +1,48 @@
 version: '3.8'
 
 services:
+  mysql:
+    image: mysql:8.4
+    container_name: chat-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: 'chatapp_users'
+      MYSQL_ROOT_PASSWORD: 'chatapp1qa2ws#ED'
+      MYSQL_USER: 'admin'
+      MYSQL_PASSWORD: 'pass0!QAZ'
+    volumes:
+      - ./grpc-auth-mysql-server/db/init:/docker-entrypoint-initdb.d
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD","mysqladmin","ping","-h","127.0.0.1","-u","root","-pchatapp1qa2ws#ED"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    networks:
+      - chat-network
+
+  auth-server:
+    build:
+      context: ./grpc-auth-mysql-server
+    container_name: auth-server
+    restart: unless-stopped
+    environment:
+      PORT: 50051
+      DB_URL: jdbc:mysql://mysql:3306/chatapp_users?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USER: 'admin'
+      DB_PASSWORD: 'pass0!QAZ'
+      JWT_SECRET: supersecret_superlong_at_least_32_chars__devonly
+      JWT_SECRET_FORMAT: PLAIN
+      ACCESS_MINUTES: 15
+      REFRESH_DAYS: 7
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "55101:50051"
+    networks:
+      - chat-network
+
   redis:
     image: redis:7-alpine
     container_name: chat-redis
@@ -16,49 +58,27 @@ services:
     networks:
       - chat-network
 
-  postgres:
-    image: postgres:15-alpine
-    container_name: chat-postgres
-    environment:
-      POSTGRES_DB: chatapp_db
-      POSTGRES_USER: chatuser
-      POSTGRES_PASSWORD: chatpass
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U chatuser -d chatapp_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - chat-network
-
-
   chat-service:
     build:
       context: ./3420 Chat Service
       dockerfile: Dockerfile
     container_name: chat-service
     environment:
-      AuthServer__Url: "http://auth-service:50051"
-      ASPNETCORE_URLS: "http://+:5065;http://+:5066"
+      AuthServer__Url: "http://auth-server:50051"
       ConnectionStrings__Redis: "redis:6379"
-      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=chatapp_db;Username=chatuser;Password=chatpass"
     ports:
       - "5065:5065"
       - "5066:5066"
     depends_on:
       - redis
-      - postgres
+      - auth-server
     restart: unless-stopped
     networks:
       - chat-network
 
 volumes:
   redis_data:
-  postgres_data:
+  mysql_data:
 
 networks:
   chat-network:
