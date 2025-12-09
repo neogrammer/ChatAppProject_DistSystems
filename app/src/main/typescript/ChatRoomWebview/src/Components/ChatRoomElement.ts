@@ -57,7 +57,7 @@ export class ChatRoomElement extends LitElement {
 
         // after subscription started and history fetched, prune duplicates
 
-        // scroll to bottom on first render
+        // scroll to bottom 
 
         // hide loading dialog after its all done
     }
