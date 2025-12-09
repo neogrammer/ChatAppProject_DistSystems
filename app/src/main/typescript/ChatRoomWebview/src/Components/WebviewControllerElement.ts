@@ -28,6 +28,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         if(this._rooms.has(room.id)) return false;
         const room_element = document.createElement('chat-room');
         room_element.name = room.roomName;
+        room_element.roomId = room.id;
         this._rooms.set(room.id, room_element);
         this.requestUpdate("_rooms");
         if(this._rooms.size === 1) this.switchToRoom(room.id);
@@ -61,6 +62,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
             DLOG("[WebviewControllerElement] Failed to switch to room because argument was null or 0 length!");
             return false;
         }
+        if(roomId === this.current_room) return true;
         if(this._rooms.has(roomId)) {
             this.current_room = roomId;
             return true;
@@ -186,6 +188,9 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
     @query("#msg_input", true)
     private _input!: HTMLInputElement;
 
+    @query("#menu_popover", true)
+    private _popover!: HTMLDivElement;
+
     private _sentIds = new Set<string>();
 
     private _onSend() {
@@ -218,40 +223,51 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         if(!room) return html``;
 
         return html`
-            <div id="header">
-                <button popovertarget="menu_popover" style="background: inherit; border: none;">
+            <div id="room_header" class="header">
+                <button popovertarget="menu_popover" class="spacer">
                     <svg xmlns="http://www.w3.org/2000/svg" class="button" height="24px" viewBox="0 0 24 24" width="24px" fill="#242424"><path d="M0 0h24v24H0z" fill="none"/><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
                 </button>
-                <span id="room_name">${room.name}</span>
+                <span id="room_name" class="header-text">${room.name}</span>
+                <div class="spacer"></div>
             </div>
             ${room}
-            <div id="footer">
+            <div id="room_footer">
                 <input id="msg_input" placeholder="Send message..."/>
                 <svg @click="${this._onSend}" class="button" id="send_btn" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#789DE5"><path d="M0 0h24v24H0z" fill="none"/><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
             </div>
             <div id="menu_popover" popover>
-                ${map([...this._rooms], (room_pair) => html`<div class="button list-button" @click="${() => this.switchToRoom(room_pair[0])}">${room_pair[1].name}</div>`)}
+                <div id="popover_header" class="header">
+                    <div class="spacer"></div>
+                    <span class="header-text">Rooms</span>
+                    <button class="spacer">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#242424"><path d="M0 0h24v24H0z" fill="none"/><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    </button>
+                </div>
+                ${map([...this._rooms], (room_pair) => html`<div class="button list-button ${room_pair[0] === this.current_room ? "active" : ""}" @click="${() => {this.switchToRoom(room_pair[0]); this._popover.hidePopover(); }}">${room_pair[1].name}</div>`)}
             </div>
         `
     }
 
     static styles = css`
         :host {
-            display: flex;
-            flex-direction: column;
             width: 100vw;
             height: 100vh;
+        }
+
+        .container, :host {
+            display: flex;
+            flex-direction: column;
             box-sizing: border-box;
             overflow: hidden;
-            background: #f5f5f7; /* Slightly off-white background for the whole app */
+            background: #f5f5f7;
         }
 
         /* HEADER — fixed at top */
-        #header {
+        .header {
             position: relative;
             display: flex;
             align-items: center;
-            justify-content: center;   /* center children horizontally */
+            justify-content: space-between;   /* center children horizontally */
 
             padding: 8px;
             box-sizing: border-box;
@@ -261,15 +277,18 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         }
 
         /* Pin the button to the left edge */
-        #header > button {
-            position: absolute;
-            left: 8px;
-            top: 50%;
-            transform: translateY(-50%);
+        .header > button {
+            background: inherit;
+            border: none;
+        }
+
+        .spacer {
+            width: 36px;
+            height: 36px;
         }
 
         /* Centered title */
-        #room_name {
+        .header-text {
             font-weight: 600;
             text-align: center;
         }
@@ -297,8 +316,12 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
             background: #ececf1;  /* soft grey chat background */
         }
 
+        chat-room, #menu_popover {
+            background: #ececf1;
+        }
+
         /* FOOTER — fixed at bottom */
-        #footer {
+        #room_footer {
             padding: 8px;
             box-sizing: border-box;
             flex: 0 0 auto;
@@ -347,7 +370,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         }
 
         /* Active/pressed state */
-        .button:active {
+        .button.active {
             background: rgba(0,0,0,0.15);
         }
 
