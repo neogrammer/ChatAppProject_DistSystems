@@ -1,6 +1,6 @@
 import "./ChatMessageElement"
 
-import { css, CSSResultGroup, html, LitElement } from "lit";
+import { css, CSSResultGroup, html, LitElement, PropertyValues } from "lit";
 import { customElement, property, queryAssignedElements } from "lit/decorators.js";
 import { ChatMessageElement } from "./ChatMessageElement";
 import { IChatMessage, IChatMessageRoomUnaware } from "../Interfaces/IChatMessage";
@@ -10,6 +10,7 @@ import { ChatMessage } from "../Generated/chat";
 @customElement("chat-room")
 export class ChatRoomElement extends LitElement {
     name!: string;
+    roomId!: string;
 
     addMessage(message: ChatMessage): boolean {
         const insert_ref = this.findInsertionElement(message.createdAt);
@@ -43,6 +44,22 @@ export class ChatRoomElement extends LitElement {
     override disconnectedCallback(): void {
         super.disconnectedCallback();
         this.removeEventListener("scroll", this._onScroll);
+    }
+
+    //todo 
+    protected override firstUpdated(_changedProperties: PropertyValues): void {
+        super.firstUpdated(_changedProperties);
+        // show loading dialog
+
+        // subscribe to message stream
+
+        // get history
+
+        // after subscription started and history fetched, prune duplicates
+
+        // scroll to bottom on first render
+
+        // hide loading dialog after its all done
     }
 
     protected override render() {
