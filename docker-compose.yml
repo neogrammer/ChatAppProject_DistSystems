@@ -16,6 +16,34 @@ services:
     networks:
       - chat-network
 
+  postgres:
+    image: postgres:15-alpine
+    container_name: chat-postgres
+    environment:
+      POSTGRES_DB: chatapp_db
+      POSTGRES_USER: chatuser
+      POSTGRES_PASSWORD: chatpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - chat-network
+
+  db-migrate:
+    build:
+      context: ./3420 Chat Service
+      dockerfile: Dockerfile
+    container_name: db-migrate
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=chatapp_db;Username=chatuser;Password=chatpass"
+    command: ["dotnet", "ef", "database", "update"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - chat-network
+
   chat-service:
     build:
       context: ./3420 Chat Service
@@ -25,17 +53,20 @@ services:
       AuthServer__Url: "http://24.236.104.52:55101"
       ASPNETCORE_URLS: "http://+:5065;http://+:5066"
       ConnectionStrings__Redis: "redis:6379"
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=chatapp_db;Username=chatuser;Password=chatpass"
     ports:
       - "5065:5065"
       - "5066:5066"
     depends_on:
       - redis
+      - db-migrate
     restart: unless-stopped
     networks:
       - chat-network
 
 volumes:
   redis_data:
+  postgres_data:
 
 networks:
   chat-network:

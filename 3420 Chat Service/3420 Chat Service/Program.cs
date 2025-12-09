@@ -1,6 +1,8 @@
 using _3420_Chat_Service.Services;
 using _3420_Chat_Service.Hubs;
+using _3420_Chat_Service.Data;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,10 @@ builder.WebHost.ConfigureKestrel(options =>
         listenOptions.Protocols = HttpProtocols.Http1;
     });
 });
+
+// Add Entity Framework
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddGrpc();
 builder.Services.AddSignalR()

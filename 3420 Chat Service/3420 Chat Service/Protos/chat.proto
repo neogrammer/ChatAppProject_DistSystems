@@ -17,6 +17,50 @@ message SendMessageResponse {
   bool success = 1;
 }
 
+message GetMessagesRequest {
+  int32 groupId = 1;
+}
+
+message GetMessagesResponse {
+  repeated ChatMessage messages = 1;
+}
+
+message CreateGroupRequest {
+  string groupName = 1;
+  string userId = 2;
+}
+
+message CreateGroupResponse {
+  bool success = 1;
+  int32 groupId = 2;
+}
+
+message AddUserToGroupRequest {
+  int32 groupId = 1;
+  string userId = 2;
+}
+
+message AddUserToGroupResponse {
+  bool success = 1;
+}
+
+message GetUserGroupsRequest {
+  string userId = 1;
+}
+
+message GroupInfo {
+  int32 id = 1;
+  string groupName = 2;
+}
+
+message GetUserGroupsResponse {
+  repeated GroupInfo groups = 1;
+}
+
 service ChatService {
   rpc SendMessage(ChatMessage) returns (SendMessageResponse);
+  rpc GetMessages(GetMessagesRequest) returns (GetMessagesResponse);
+  rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse);
+  rpc AddUserToGroup(AddUserToGroupRequest) returns (AddUserToGroupResponse);
+  rpc GetUserGroups(GetUserGroupsRequest) returns (GetUserGroupsResponse);
 }
