@@ -42,7 +42,7 @@ services:
       dockerfile: Dockerfile
     container_name: chat-service
     environment:
-      AuthServer__Url: "http://24.236.104.52:55101"
+      AuthServer__Url: "http://auth-service:50051"
       ASPNETCORE_URLS: "http://+:5065;http://+:5066"
       ConnectionStrings__Redis: "redis:6379"
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=chatapp_db;Username=chatuser;Password=chatpass"
