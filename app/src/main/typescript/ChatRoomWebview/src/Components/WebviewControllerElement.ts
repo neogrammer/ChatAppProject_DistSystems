@@ -1,5 +1,6 @@
 // use array of rooms + state index
 import "./ChatRoomElement"
+import "./SideMenuElement"
 import { css, html, LitElement } from "lit";
 import { IWebviewController } from "../Interfaces/IWebviewController";
 import { IChatMessage } from "../Interfaces/IChatMessage";
@@ -235,38 +236,9 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
                 <input id="msg_input" placeholder="Send message..."/>
                 <svg @click="${this._onSend}" class="button icon" id="send_btn" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#789DE5"><path d="M0 0h24v24H0z" fill="none"/><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
             </div>
-            <div id="menu_popover" popover>
-                <div id="menu_popover_header" class="header">
-                    <div class="spacer"></div>
-                    <span class="header-text">Rooms</span>
-                    <button class="spacer" popovertarget="add_room_popover">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#242424"><path d="M0 0h24v24H0z" fill="none"/><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                    </button>
-                    <div id="add_room_popover" popover>
-                        <div class="header">
-                            <div class="spacer"></div>
-                            <span class="header-text">Create New Chat Room</span>
-                            <div class="spacer"></div>
-                        </div>
-                        <div>
-                            <label for="add_room_popover_room_name_input">Name: </label>
-                            <input id="add_room_popover_room_name_input" placeholder="Enter new room name..." />
-                        </div>
-                        <div>
-                            <label for="add_room_popover_user_search_input">Users: </label>
-                            <input id="add_room_popover_user_search_input" placeholder="Search for users to add..." />
-                            <svg id="add_room_popover_searching" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#242424"><path d="M0 0h24v24H0z" fill="none"/><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
-                        </div>
-                        <div>
-                            <button>Cancel</button>
-                            <button disabled>OK</button>
-                        </div>
-                    </div>
-                </div>
-                ${map([...this._rooms], (room_pair) => html`<div class="button list-button ${room_pair[0] === this.current_room ? "active" : ""}" @click="${() => {this.switchToRoom(room_pair[0]); this._popover.hidePopover(); }}">${room_pair[1].name}</div>`)}
-            </div>
-            
-            
+            <side-menu id="menu_popover" popover>
+                ${map([...this._rooms], (room_pair) => html`<div class="button list-button ${room_pair[0] === this.current_room ? "active" : ""}" @click="${() => {this.switchToRoom(room_pair[0]);}}">${room_pair[1].name}</div>`)}
+            </side-menu>
         `
     }
 
@@ -313,32 +285,6 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         .header-text {
             font-weight: 600;
             text-align: center;
-        }
-
-        #menu_popover {
-            position: absolute;
-            width: 80%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: 3;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            background: #bfbfca;
-        }
-
-        #add_room_popover { 
-            position: absolute;
-            flex-direction: column;
-        }
-
-        #add_room_popover:popover-open {
-            display: flex;
-        }
-
-        #add_room_popover_searching {
-            visibility: hidden;
         }
 
         /* CHAT-ROOM — fills remaining vertical space */
