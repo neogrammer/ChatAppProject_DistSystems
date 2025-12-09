@@ -1,6 +1,40 @@
 version: '3.8'
 
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: chat-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - chat-network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: chat-postgres
+    environment:
+      POSTGRES_DB: chatapp_db
+      POSTGRES_USER: chatuser
+      POSTGRES_PASSWORD: chatpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chatuser -d chatapp_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - chat-network
+
   mysql:
     image: mysql:8.4
     container_name: chat-mysql
@@ -21,10 +55,10 @@ services:
     networks:
       - chat-network
 
-  auth-server:
+  auth-service:
     build:
       context: ./grpc-auth-mysql-server
-    container_name: auth-server
+    container_name: auth-service
     restart: unless-stopped
     environment:
       PORT: 50051
@@ -43,41 +77,30 @@ services:
     networks:
       - chat-network
 
-  redis:
-    image: redis:7-alpine
-    container_name: chat-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - chat-network
-
   chat-service:
     build:
       context: ./3420 Chat Service
       dockerfile: Dockerfile
     container_name: chat-service
     environment:
-      AuthServer__Url: "http://auth-server:50051"
+      AuthServer__Url: "http://auth-service:50051"
+      ASPNETCORE_URLS: "http://+:5065;http://+:5066"
       ConnectionStrings__Redis: "redis:6379"
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=chatapp_db;Username=chatuser;Password=chatpass"
     ports:
       - "5065:5065"
       - "5066:5066"
     depends_on:
       - redis
-      - auth-server
+      - postgres
+      - auth-service
     restart: unless-stopped
     networks:
       - chat-network
 
 volumes:
   redis_data:
+  postgres_data:
   mysql_data:
 
 networks:
