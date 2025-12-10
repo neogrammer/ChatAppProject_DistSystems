@@ -5,66 +5,82 @@ import { customElement, query, state } from "lit/decorators.js";
 export class AddRoomElement extends LitElement {
     override connectedCallback(): void { 
         super.connectedCallback();
-        this.addEventListener("toggle", this.onToggled);
+        this.addEventListener("toggle", this.onHostToggled);
         //todo add search result received event
     }
 
     override disconnectedCallback(): void {
         super.disconnectedCallback();
-        this.removeEventListener("toggle", this.onToggled);
+        this.removeEventListener("toggle", this.onHostToggled);
         //todo remove search result received event
+    }
+
+    protected override firstUpdated(_changedProperties: PropertyValues): void {
+        super.firstUpdated(_changedProperties);
+        // setTimeout(() => {
+        //     this._search_popover.showPopover();
+        // }, 5000);
+    }
+
+    // todo add params with correct proto types
+    setSearchResults() {
+        // todo populate result list element with results and show if needed
     }
 
     protected override render() { 
        return html`
             <div class="add-room-container">
                 <div class="header">
-                <span class="header-text">Create New Chat Room</span>
+                    <span class="header-text">Create New Chat Room</span>
                 </div>
 
                 <div class="form-body">
-                <!-- Name row -->
-                <div class="field-row">
-                    <label for="room_name_input">Name:</label>
-                    <input
-                        id="room_name_input"
-                        class="text-input"
-                        placeholder="Enter new room name..."
-                        @input="${this.onNameInput}"/>
-                </div>
-
-                <!-- Users row -->
-                <div class="field-row">
-                    <label for="user_search_input">Users:</label>
-                    <div class="input-with-icon">
-                    <input
-                        id="user_search_input"
-                        class="text-input"
-                        placeholder="Search for users to add..."
-                        @input="${this.onSearchInput}"/>
-                    <svg id="search_icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#242424"><path d="M0 0h24v24H0z" fill="none" /><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                    <!-- Name row -->
+                    <div class="field-row">
+                        <label for="room_name_input">Name:</label>
+                        <input
+                            id="room_name_input"
+                            class="text-input"
+                            placeholder="Enter new room name..."
+                            @input="${this.onNameInput}"/>
                     </div>
-                </div>
 
-                <!-- Scrollable user bubble list -->
-                <div class="user-list-container">
-                    <!-- Example bubbles; you’ll generate these from data -->
-                    <!-- <div class="user-bubble">
-                    <span class="user-name">alice</span>
-                    <button class="user-remove-btn" aria-label="Remove alice">×</button>
+                    <!-- Users row -->
+                    <div class="field-row">
+                        <label for="user_search_input">Users:</label>
+                        <div class="input-with-icon">
+                        <input
+                            id="user_search_input"
+                            class="text-input"
+                            placeholder="Search for users to add..."
+                            @input="${this.onSearchInput}"/>
+                        <svg id="search_icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#242424"><path d="M0 0h24v24H0z" fill="none" /><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                        </div>
                     </div>
-                    <div class="user-bubble">
-                    <span class="user-name">bob</span>
-                    <button class="user-remove-btn" aria-label="Remove bob">×</button>
-                    </div> -->
-                    <!-- ... more bubbles here ... -->
-                </div>
 
-                <!-- Buttons -->
-                <div class="buttons-row">
-                    <button class="cancel-btn" @click="${this.onCancel}">Cancel</button>
-                    <button class="ok-btn" ?disabled=${!this.submittable}>OK</button>
-                </div>
+                    <!-- Scrollable user bubble list -->
+                    <div class="user-list-container">
+                        <!-- Example bubbles; you’ll generate these from data -->
+                        <!-- <div class="user-bubble">
+                        <span class="user-name">alice</span>
+                        <button class="user-remove-btn" aria-label="Remove alice">×</button>
+                        </div>
+                        <div class="user-bubble">
+                        <span class="user-name">bob</span>
+                        <button class="user-remove-btn" aria-label="Remove bob">×</button>
+                        </div> -->
+                        <!-- ... more bubbles here ... -->
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="buttons-row">
+                        <button class="cancel-btn" @click="${this.onCancel}">Cancel</button>
+                        <button class="ok-btn" ?disabled=${!this.submittable}>OK</button>
+                    </div>
+
+                    <div id="user_search_popover" popover="manual" @toggle="${this.onSearchPopoverToggled}">
+                        <span>Test Test Test Test Test Test Test Test Test Test </span>
+                    </div>
                 </div>
             </div>
         `;
@@ -74,9 +90,17 @@ export class AddRoomElement extends LitElement {
     private onCancel() { this.hidePopover(); }
     //todo set submittable if names non empty and this isnt empty
     private onNameInput(event: InputEvent) {}
-    private onToggled = (event: ToggleEvent) => {
+    private onHostToggled = (event: ToggleEvent) => {
         if(event.newState === "closed") { 
             //todo reset form
+        }
+    }
+    private onSearchPopoverToggled(event: ToggleEvent) { 
+        event.newState === "open" ? this.addEventListener("click", this.onHostClickedWhileSearchPopoverOpen) : this.removeEventListener("click", this.onHostClickedWhileSearchPopoverOpen);
+    }
+    private onHostClickedWhileSearchPopoverOpen(event: MouseEvent) {
+        if(!(event.composedPath().includes(this._search_popover))) {
+            this._search_popover.hidePopover();
         }
     }
     private readonly onSearchInput = {
@@ -88,6 +112,15 @@ export class AddRoomElement extends LitElement {
             }, 300);
         }
     }
+
+    @query("#user_search_popover", true)
+    private _search_result_container!: HTMLDivElement;
+
+    @query("#user_search_input", true)
+    private _search_input!: HTMLInputElement;
+
+    @query("#user_search_popover", true)
+    private _search_popover!: HTMLDivElement;
 
     @state()
     private submittable = false;
@@ -183,6 +216,32 @@ export class AddRoomElement extends LitElement {
         #search_icon.searching {
             visibility: visible;
             animation: spin 1s linear infinite;
+        }
+
+        #user_search_input {
+            anchor-name: --user-search-input;
+        }
+
+        #user_search_popover { 
+            /* kill UA default centering */
+            margin: 0;
+            inset: auto;
+
+            position: absolute; /* or absolute if you prefer */
+            position-anchor: --user-search-input;
+
+            /* Put it below the input, aligned to its left edge */
+            inset-block-start: anchor(bottom);
+            inset-inline-start: anchor(start);
+            inset-inline-end: anchor(end);
+
+            /* or, simpler: position-area: block-end; if you want it directly under */
+            /* position-area: block-end; */
+
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 4px;
         }
 
         /* Scrollable bubble list */
