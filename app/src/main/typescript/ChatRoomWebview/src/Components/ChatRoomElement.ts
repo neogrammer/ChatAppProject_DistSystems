@@ -46,20 +46,40 @@ export class ChatRoomElement extends LitElement {
         this.removeEventListener("scroll", this._onScroll);
     }
 
-    //todo 
+    @queryAssignedElements()
+    private current_messages!: Array<HTMLElement>
+
     protected override firstUpdated(_changedProperties: PropertyValues): void {
         super.firstUpdated(_changedProperties);
-        // show loading dialog
+        AndroidBridge.showLoadingDialog();
 
         // subscribe to message stream
-
-        // get history
-
-        // after subscription started and history fetched, prune duplicates
-
-        // scroll to bottom 
-
-        // hide loading dialog after its all done
+        connection.invoke("JoinGroup", this.roomId)
+            // get history
+            .then(() => AsyncAndroidBridge.requestMessageHistory(WebviewControllerEncoder.encodeChatMessageHistoryRequest({groupId: this.roomId})))
+            // after subscription started and history fetched, prune duplicates 
+            // (streamed message could have been committed to history between requests)
+            .then((messages: ChatMessage[]) => {
+                this.current_messages?.forEach((elem) => {
+                    const idx = messages.findIndex((msg) => ("m" + msg.id) === elem.id);
+                    if(idx !== -1) messages.splice(idx, 1); // remove duplicate
+                });
+                // add remaining messages (index 0 is newest)
+                const update_promises: Promise<boolean>[] = [];
+                for(const old_msg of messages) {
+                    const elem = ChatRoomElement.protoToElement(old_msg);
+                    this.prepend(elem);
+                    update_promises.push(elem.updateComplete);
+                }
+                return Promise.all(update_promises);
+            })
+            .catch((err) => {
+                DLOG("[ChatRoomElement] Error during initial room setup: " + err);
+            })
+            // hide loading dialog after it's all done
+            .finally(() => {
+                AndroidBridge.hideLoadingDialog();
+            });
     }
 
     protected override render() {
@@ -125,7 +145,7 @@ export class ChatRoomElement extends LitElement {
 
     private static protoToElement(message: ChatMessage): ChatMessageElement {
         const element = document.createElement('chat-message');
-        element.id = message.id;
+        element.id = "m" + message.id;
         element.senderId = message.userId;
         element.senderName = message.userName;
         element.createdAt = message.createdAt;

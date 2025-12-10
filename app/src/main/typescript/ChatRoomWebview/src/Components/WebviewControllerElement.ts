@@ -1,7 +1,7 @@
 // use array of rooms + state index
 import "./ChatRoomElement"
 import "./SideMenuElement"
-import { css, html, LitElement } from "lit";
+import { css, html, LitElement, PropertyValues } from "lit";
 import { IWebviewController } from "../Interfaces/IWebviewController";
 import { IChatMessage } from "../Interfaces/IChatMessage";
 import { IChatRoom } from "../Interfaces/IChatRoom";
@@ -183,6 +183,23 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         return this as unknown as T;
     }
 
+    protected override firstUpdated(_changedProperties: PropertyValues): void {
+        super.firstUpdated(_changedProperties);
+        AndroidBridge.showLoadingDialog();
+        AsyncAndroidBridge.requestUserGroups().then((groups) => {
+            groups.forEach((group) => {
+                this.addRoom({
+                    id: group.id,
+                    roomName: group.groupName
+                });
+            });
+        }).catch((err) => {
+            DLOG("[WebviewControllerElement] Failed to fetch user groups from AndroidBridge: " + err);
+        }).finally(() => {
+            AndroidBridge.hideLoadingDialog();
+        });
+    }
+
     @state()
     private current_room = "";
 
@@ -236,7 +253,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
                 <input id="msg_input" placeholder="Send message..."/>
                 <svg @click="${this._onSend}" class="button icon" id="send_btn" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#789DE5"><path d="M0 0h24v24H0z" fill="none"/><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
             </div>
-            <side-menu id="menu_popover" popover>
+            <side-menu id="menu_popover" popover ?no-rooms="${this._rooms.size === 0}">
                 ${map([...this._rooms], (room_pair) => html`<div class="button list-button ${room_pair[0] === this.current_room ? "active" : ""}" @click="${() => {this.switchToRoom(room_pair[0]);}}">${room_pair[1].name}</div>`)}
             </side-menu>
         `

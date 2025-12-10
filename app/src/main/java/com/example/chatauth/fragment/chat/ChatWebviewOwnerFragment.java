@@ -26,12 +26,14 @@ import com.example.chatauth.MainActivity;
 import com.example.chatauth.chat.ChatClient;
 import com.example.chatauth.fragment.loading.LoadingDialogFragment;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageLite;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import ink.bluballz.chat.v1.ChatMessage;
-import ink.bluballz.chat.v1.ChatMessageHistoryRequest;
+import ink.bluballz.chat.v1.GetMessagesRequest;
+import ink.bluballz.chat.v1.GetUserGroupsRequest;
 
 public class ChatWebviewOwnerFragment extends Fragment {
     public static final String TAG = "WebviewOwnerFragment";
@@ -193,20 +195,31 @@ public class ChatWebviewOwnerFragment extends Fragment {
         }
 
         @JavascriptInterface
-        public void requestMessageHistory(String b64_req) {
+        public void requestMessageHistory(String b64_req, String request_id) {
             var bytes = Base64.decode(b64_req, Base64.DEFAULT);
-            ChatMessageHistoryRequest req = null;
+            GetMessagesRequest req = null;
             try {
-                req = ChatMessageHistoryRequest.parseFrom(bytes);
+                req = GetMessagesRequest.parseFrom(bytes);
             } catch (InvalidProtocolBufferException e) {
                 Log.e(TAG, "Failed to parse message history request: " + e.getMessage());
                 return;
             }
-            //todo Make the grpc call here. use the UIStreamResponse for the async callback and
-            // call controller.get().AddMessages(), or make an error dialog (in progress) on error
+            //todo Make the grpc call here. pass the response to this.resolveResponse()
+        }
+
+        @JavascriptInterface
+        public void requestUserGroups(String request_id) {
+            GetUserGroupsRequest req = GetUserGroupsRequest.newBuilder().setUserId(userId).build();
+            //todo Make the grpc call here. pass the response to this.resolveResponse() to update JS
         }
 
         public boolean getLoaded() { return loaded; }
+
+        public void resolveResponse(MessageLite response, String request_id) {
+            handler.post(() -> {
+
+            });
+        }
 
         public final Handler handler = new Handler(Looper.getMainLooper());
     }
