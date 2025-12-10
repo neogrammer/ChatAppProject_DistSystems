@@ -83,7 +83,7 @@ namespace _3420_Chat_Service.Services
             {
                 var messages = await _dbContext.Messages
                     .Where(m => m.GroupId == request.GroupId)
-                    .OrderBy(m => m.SentAt)
+                    .OrderByDescending(m => m.SentAt)
                     .Select(m => new ChatMessage
                     {
                         Id = m.Id.ToString(),
