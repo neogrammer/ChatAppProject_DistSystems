@@ -1,11 +1,13 @@
 // use array of rooms + state index
 import "./ChatRoomElement"
-import { css, html, LitElement } from "lit";
+import "./SideMenuElement"
+import { css, html, LitElement, PropertyValues } from "lit";
 import { IWebviewController } from "../Interfaces/IWebviewController";
 import { IChatMessage } from "../Interfaces/IChatMessage";
 import { IChatRoom } from "../Interfaces/IChatRoom";
 import { ChatRoomElement } from "./ChatRoomElement";
 import { customElement, query, state } from "lit/decorators.js";
+import { map } from "lit/directives/map.js";
 import { ChatMessage } from "../Generated/chat";
 import { randomUUID } from "crypto";
 
@@ -27,7 +29,9 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         if(this._rooms.has(room.id)) return false;
         const room_element = document.createElement('chat-room');
         room_element.name = room.roomName;
+        room_element.roomId = room.id;
         this._rooms.set(room.id, room_element);
+        this.requestUpdate("_rooms");
         if(this._rooms.size === 1) this.switchToRoom(room.id);
         return true;
     }
@@ -49,7 +53,9 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
             this.current_room = as_array[new_index][0];
         }
 
-        return this._rooms.delete(roomId);
+        const return_val = this._rooms.delete(roomId);
+        if(return_val) this.requestUpdate("_rooms");
+        return return_val;
     }
 
     switchToRoom(roomId: string): boolean {
@@ -57,6 +63,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
             DLOG("[WebviewControllerElement] Failed to switch to room because argument was null or 0 length!");
             return false;
         }
+        if(roomId === this.current_room) return true;
         if(this._rooms.has(roomId)) {
             this.current_room = roomId;
             return true;
@@ -176,11 +183,31 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         return this as unknown as T;
     }
 
+    protected override firstUpdated(_changedProperties: PropertyValues): void {
+        super.firstUpdated(_changedProperties);
+        AndroidBridge.showLoadingDialog();
+        AsyncAndroidBridge.requestUserGroups().then((groups) => {
+            groups.forEach((group) => {
+                this.addRoom({
+                    id: group.id,
+                    roomName: group.groupName
+                });
+            });
+        }).catch((err) => {
+            DLOG("[WebviewControllerElement] Failed to fetch user groups from AndroidBridge: " + err);
+        }).finally(() => {
+            AndroidBridge.hideLoadingDialog();
+        });
+    }
+
     @state()
     private current_room = "";
 
     @query("#msg_input", true)
     private _input!: HTMLInputElement;
+
+    @query("#menu_popover", true)
+    private _popover!: HTMLDivElement;
 
     private _sentIds = new Set<string>();
 
@@ -210,44 +237,71 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
 
     protected override render() {
         if(this.current_room.length === 0) return html``;
-        const room = this._rooms.get(this.current_room);
+        const room = this._rooms.get(this.current_room); //todo use when()
         if(!room) return html``;
 
         return html`
-            <div id="header">
-                <span id="room_name">${room.name}</span>
+            <div id="room_header" class="header">
+                <button popovertarget="menu_popover" class="spacer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="button" height="24px" viewBox="0 0 24 24" width="24px" fill="#242424"><path d="M0 0h24v24H0z" fill="none"/><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+                </button>
+                <span id="room_name" class="header-text">${room.name}</span>
+                <div class="spacer"></div>
             </div>
             ${room}
-            <div id="footer">
+            <div id="room_footer" class="input-with-icon-container">
                 <input id="msg_input" placeholder="Send message..."/>
-                <svg @click="${this._onSend}" id="send_btn" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#789DE5"><path d="M0 0h24v24H0z" fill="none"/><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                <svg @click="${this._onSend}" class="button icon" id="send_btn" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#789DE5"><path d="M0 0h24v24H0z" fill="none"/><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
             </div>
+            <side-menu id="menu_popover" popover ?no-rooms="${this._rooms.size === 0}">
+                ${map([...this._rooms], (room_pair) => html`<div class="button list-button ${room_pair[0] === this.current_room ? "active" : ""}" @click="${() => {this.switchToRoom(room_pair[0]);}}">${room_pair[1].name}</div>`)}
+            </side-menu>
         `
     }
 
     static styles = css`
         :host {
-            display: flex;
-            flex-direction: column;
             width: 100vw;
             height: 100vh;
+        }
+
+        .container, :host {
+            display: flex;
+            flex-direction: column;
             box-sizing: border-box;
             overflow: hidden;
-            background: #f5f5f7; /* Slightly off-white background for the whole app */
+            background: #f5f5f7;
         }
 
         /* HEADER — fixed at top */
-        #header {
+        .header {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;   /* center children horizontally */
+
             padding: 8px;
             box-sizing: border-box;
-            flex: 0 0 auto;
             background: #ffffff;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.15); /* subtle elevation */
-            display: flex;
-            justify-content: center;  /* center horizontally */
-            align-items: center;      /* center vertically */
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+            z-index: 2;
+        }
+
+        /* Pin the button to the left edge */
+        .header > button, .icon {
+            background: inherit;
+            border: none;
+        }
+
+        .spacer {
+            width: 36px;
+            height: 36px;
+        }
+
+        /* Centered title */
+        .header-text {
             font-weight: 600;
-            z-index: 2; /* keeps shadow crisp above chat-room scroll area */
+            text-align: center;
         }
 
         /* CHAT-ROOM — fills remaining vertical space */
@@ -260,8 +314,12 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
             background: #ececf1;  /* soft grey chat background */
         }
 
+        chat-room, #menu_popover {
+            background: #ececf1;
+        }
+
         /* FOOTER — fixed at bottom */
-        #footer {
+        .input-with-icon-container {
             padding: 8px;
             box-sizing: border-box;
             flex: 0 0 auto;
@@ -274,7 +332,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         }
 
         /* INPUT expands as much as possible */
-        #msg_input {
+        .input-with-icon-container > input {
             flex: 1 1 auto;   /* grow into available space */
             padding: 6px 8px;
             border: 1px solid #ccc;
@@ -285,27 +343,39 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         }
 
         /* SEND BUTTON — consistent size + elevation feedback */
-        #send_btn {
+        .input-with-icon-container > .icon {
             flex: 0 0 auto;
             cursor: pointer;
             border-radius: 4px;
             padding: 4px; /* clickable area */
+        }
+
+        .button {
             transition: background 0.15s ease;
         }
 
+        .list-button { 
+            width: 100%;
+            padding-top: 2px;
+            padding-bottom: 2px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
         /* Hover state */
-        #send_btn:hover {
+        .button:hover {
             background: rgba(0,0,0,0.07);
         }
 
         /* Active/pressed state */
-        #send_btn:active {
+        .button.active {
             background: rgba(0,0,0,0.15);
         }
 
 
     `;
 
+    @state()
     private _rooms: Map<string, ChatRoomElement> = new Map();
 
 }

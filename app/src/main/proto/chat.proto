@@ -6,6 +6,7 @@ option java_multiple_files = true;
 option java_package = "ink.bluballz.chat.v1";
 option java_outer_classname = "ChatProto";
 option optimize_for = LITE_RUNTIME;
+option csharp_namespace = "_3420_Chat_Service";
 
 message ChatMessage {
   string id        = 1;  // stringified DB id
@@ -16,27 +17,54 @@ message ChatMessage {
   int64  createdAt = 6;  // unix millis
 }
 
-message ChatRoom {
-  string id = 1;
-  string roomName = 2;
-}
-
-message ChatMessageHistoryRequest {
-  string roomId = 1;
-  string userId = 2;
-  int64 minTime = 3;
-  int64 maxTime = 4;
-  int64 maxMessages = 5;
-}
-
-message ChatMessageHistoryResponse {
-  repeated ChatMessage messages = 1;
-}
-
 message SendMessageResponse {
   bool success = 1;
 }
 
+message GetMessagesRequest {
+  string groupId = 1;
+}
+
+message GetMessagesResponse {
+  repeated ChatMessage messages = 1;
+}
+
+message CreateGroupRequest {
+  string groupName = 1;
+  string userId = 2;
+}
+
+message CreateGroupResponse {
+  bool success = 1;
+  string groupId = 2;
+}
+
+message AddUserToGroupRequest {
+  string groupId = 1;
+  string userId = 2;
+}
+
+message AddUserToGroupResponse {
+  bool success = 1;
+}
+
+message GetUserGroupsRequest {
+  string userId = 1;
+}
+
+message GroupInfo {
+  string  id = 1;
+  string groupName = 2;
+}
+
+message GetUserGroupsResponse {
+  repeated GroupInfo groups = 1;
+}
+
 service ChatService {
   rpc SendMessage(ChatMessage) returns (SendMessageResponse);
+  rpc GetMessages(GetMessagesRequest) returns (GetMessagesResponse);
+  rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse);
+  rpc AddUserToGroup(AddUserToGroupRequest) returns (AddUserToGroupResponse);
+  rpc GetUserGroups(GetUserGroupsRequest) returns (GetUserGroupsResponse);
 }

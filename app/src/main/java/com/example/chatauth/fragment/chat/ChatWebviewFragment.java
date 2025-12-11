@@ -28,7 +28,7 @@ import java.util.Date;
 import java.util.Objects;
 
 import ink.bluballz.chat.v1.ChatMessage;
-import ink.bluballz.chat.v1.ChatRoom;
+//import ink.bluballz.chat.v1.ChatRoom;
 
 public class ChatWebviewFragment extends Fragment /*implements IWebviewController*/ {
     @Override
@@ -45,7 +45,7 @@ public class ChatWebviewFragment extends Fragment /*implements IWebviewControlle
         if(args_obj.userId == null || args_obj.userId.isBlank()) throw new RuntimeException("Can't construct chat webview without userId!");
         if(args_obj.userName == null || args_obj.userName.isBlank()) throw new RuntimeException("Can't construct chat webview without userName!");
         webview_owner.load(args_obj.userId, args_obj.userName, this);
-        addRoom(ChatRoom.newBuilder().setId("main").setRoomName("Anonymous").build(), null);
+        //addRoom(ChatRoom.newBuilder().setId("main").setRoomName("Anonymous").build(), null);
     }
 
     @Override
@@ -66,16 +66,16 @@ public class ChatWebviewFragment extends Fragment /*implements IWebviewControlle
     }
 
 //    @Override
-    public void addRoom(ChatRoom room, @Nullable JSCallback<Boolean> callback) {
-        webview_owner.withLoadedWebview(webview -> {
-            String js = "window.WebviewController.addRoom("
-                    + "window.WebviewControllerDecoder.decodeChatRoom("
-                    + jsBase64Arg(room)
-                    + "))";
-
-            webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
-        });
-    }
+//    public void addRoom(ChatRoom room, @Nullable JSCallback<Boolean> callback) {
+//        webview_owner.withLoadedWebview(webview -> {
+//            String js = "window.WebviewController.addRoom("
+//                    + "window.WebviewControllerDecoder.decodeChatRoom("
+//                    + jsBase64Arg(room)
+//                    + "))";
+//
+//            webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
+//        });
+//    }
 
     public static class Arguments implements Parcelable {
         public final String userId;
