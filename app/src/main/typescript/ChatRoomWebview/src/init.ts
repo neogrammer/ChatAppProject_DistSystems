@@ -1,5 +1,6 @@
 import * as signalR from "@microsoft/signalr";
 import { AddUserToGroupResponse, ChatMessage, CreateGroupResponse, GetMessagesRequest, GetMessagesResponse, GetUserGroupsRequest, GetUserGroupsResponse, GroupInfo, SearchUsersResponse } from "./Generated/chat";
+import { WebviewControllerElement } from "./Components/WebviewControllerElement";
 
 let initialized = false;
 
@@ -273,9 +274,17 @@ export function ensureInitialized() {
             (AndroidBridge as any).addUserToGroup(userId, groupId, id);
             return WebviewControllerDecoder.decodeAddUserToGroupResponse(await promise);
         },
-    }
+    };
     
-    customElements.whenDefined("webview-controller").then(() => {AndroidBridge.setLoaded()});
+    // customElements.whenDefined("webview-controller")
+    //     .then(() => WebviewController.asElement<WebviewControllerElement>().updateComplete)
+    //     .then(complete => );
+
+    (async () => {
+        await customElements.whenDefined("webview-controller");
+        while(!(await WebviewController.asElement<WebviewControllerElement>().updateComplete)) {}
+        AndroidBridge.setLoaded();
+    })();
 }
 
 /**

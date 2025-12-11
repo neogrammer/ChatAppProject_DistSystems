@@ -42,7 +42,8 @@ export class AddRoomElement extends LitElement {
                             id="user_search_input"
                             class="text-input"
                             placeholder="Search for users to add..."
-                            @change="${this.onSearchChange}"/>
+                            @input="${this.onSearchInput}"
+                            @focus="${this.onSearchFocus}"/>
                         <svg id="search_icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#242424"><path d="M0 0h24v24H0z" fill="none" /><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
                         </div>
                     </div>
@@ -96,6 +97,7 @@ export class AddRoomElement extends LitElement {
 
     // Submits the form if its submittable
     private onOk() {
+        DLOG("[AddRoomElement] Creating room...");
         if(!this.submittable) {
             DLOG("[AddRoomElement] Can't submit create room request because the form isn't filled out!");
             return;
@@ -141,6 +143,7 @@ export class AddRoomElement extends LitElement {
 
     // Set submittable if names non empty and this isnt empty
     private onNameChange(event: InputEvent) {
+        DLOG("[AddRoomElement] Changing new room name!")
         const input = event.currentTarget as HTMLInputElement;
         this.submittable = input.value.length > 0 && this._selected_users.length > 0;
     }
@@ -149,15 +152,15 @@ export class AddRoomElement extends LitElement {
     // search promise doesn't apply.
     private onHostToggled = (event: ToggleEvent) => {
         if(event.newState === "closed") { 
-            clearTimeout(this.onSearchChange.timeout);
+            clearTimeout(this.onSearchInput.timeout);
             this._name_input.value = "";
             this._search_input.value = "";
             this._selected_users = [];
             this._current_search_result_items = [];
             this.submittable = false;
-            this.onSearchChange.result?.then(() => {
+            this.onSearchInput.result?.then(() => {
                 this._current_search_result_items = [];
-                this.onSearchChange.result = undefined;
+                this.onSearchInput.result = undefined;
             });
         }
     }
@@ -174,21 +177,35 @@ export class AddRoomElement extends LitElement {
         }
     }
 
+    private onSearchFocus() {
+        if(this._current_search_result_items.length) this._search_popover.showPopover();
+    }
+
     // Event listener that gets search results as you type (debounced by 300ms)
-    private readonly onSearchChange = {
+    private readonly onSearchInput = {
         timeout: undefined as ReturnType<typeof setTimeout> | undefined,
         result: undefined as Promise<SearchUsersResponse> | undefined,
         handleEvent: (event: InputEvent) => {
-            clearTimeout(this.onSearchChange.timeout);
+            clearTimeout(this.onSearchInput.timeout);
             this.removeAttribute("searching");
-            this.onSearchChange.result = undefined;
-
-            this.onSearchChange.timeout = setTimeout(() => {
+            this.onSearchInput.result = undefined;
+            this.onSearchInput.timeout = setTimeout(() => {
                 this.setAttribute("searching", "");
-                const promise = window.AsyncAndroidBridge.searchUsers((event.currentTarget as HTMLInputElement).value);
-                this.onSearchChange.result = promise;
+                const value = this._search_input.value;
+                DLOG("[AddRoomElement] Starting search for " + value);
+                if(!value || value.length === 0) {
+                    this._current_search_result_items = [];
+                    this.removeAttribute("searching");
+                    this._search_popover.hidePopover();
+                    return;
+                }
+                const promise = window.AsyncAndroidBridge.searchUsers(value);
+                this.onSearchInput.result = promise;
                 promise.then(result => {
-                    if(promise !== this.onSearchChange.result) return; // outdated result
+                    if(promise !== this.onSearchInput.result) return; // outdated result
+                    const user_id = AndroidBridge.getUserId();
+                    const this_user_idx = result.users.findIndex(v => v.userId === user_id); //todo remove when server side fix is enable
+                    if(this_user_idx !== -1) result.users.splice(this_user_idx, 1); // todo remove when server side fix is enabled
                     this._current_search_result_items = result.users;
                     this.removeAttribute("searching");
                     this._search_popover.showPopover();
