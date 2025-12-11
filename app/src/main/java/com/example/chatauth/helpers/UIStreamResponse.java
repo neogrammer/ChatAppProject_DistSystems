@@ -17,18 +17,18 @@ import io.grpc.stub.StreamObserver;
  * @param <T> The type of the data being observed in the stream.
  */
 public class UIStreamResponse<T> implements StreamObserver<T> {
-    public UIStreamResponse(OnResultCallback<T> callback) {
+    public UIStreamResponse(@Nullable OnResultCallback<T> callback) {
         this.callback = callback;
         if(ui_thread == null) ui_thread = new Handler(Looper.getMainLooper());
     }
     @Override
     public void onNext(T value) {
-        ui_thread.post(() -> callback.execute(value, null));
+        if(callback != null) ui_thread.post(() -> callback.execute(value, null));
     }
 
     @Override
     public void onError(Throwable t) {
-        ui_thread.post(() -> callback.execute(null, t));
+        if(callback != null) ui_thread.post(() -> callback.execute(null, t));
     }
 
     @Override
