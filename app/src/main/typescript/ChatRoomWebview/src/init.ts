@@ -157,8 +157,9 @@ export function ensureInitialized() {
     //const ROOM_ID = "main";
 
     // setup signalr connection
+    const userId = window.AndroidBridge.getUserId();
     window.connection = new signalR.HubConnectionBuilder()
-        .withUrl(`${CHAT_SERVICE_URL}/chathub`)
+        .withUrl(`${CHAT_SERVICE_URL}/chathub?userId=${userId}`)
         .withAutomaticReconnect()
         .build();
 
@@ -167,6 +168,13 @@ export function ensureInitialized() {
         DLOG("received message via signalr");
         DLOG(message);
         window.WebviewController.addMessage(message);
+    });
+
+    // handle group added notifications
+    connection.on("GroupAdded", (groupId: string, groupName: string) => {
+        DLOG("received GroupAdded notification via signalr");
+        DLOG(`Group: ${groupName} (${groupId})`);
+        window.WebviewController.addRoom({id: groupId, groupName: groupName});
     });
 
     // connect and join room
