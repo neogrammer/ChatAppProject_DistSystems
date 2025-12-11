@@ -12,6 +12,7 @@ import { map } from "lit/directives/map.js";
 import { ChatMessage } from "../Generated/chat";
 import { randomUUID } from "crypto";
 import { ensureInitialized } from "../init";
+import { SideMenuElment } from "./SideMenuElement";
 
 @customElement("webview-controller")
 export class WebviewControllerElement extends LitElement implements IWebviewController {
@@ -73,6 +74,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         if(roomId === this.current_room) return true;
         if(this._rooms.has(roomId)) {
             this.current_room = roomId;
+            this.updateComplete.then(() => { this._popover.hidePopover(); });
             return true;
         }
         DLOG(`[WebviewControllerElement] Failed to switch to room because roomId '${roomId}' doesn't exist!`);
@@ -195,6 +197,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         DLOG("[WebviewControllerElement] Fetching user groups from AndroidBridge...");
         AndroidBridge.showLoadingDialog();
         AsyncAndroidBridge.requestUserGroups().then((groups) => {
+            DLOG(`[WebviewControllerElement] Received ${groups.length} user groups from AndroidBridge.`);
             groups.forEach((group) => {
                 this.addRoom({
                     id: group.id,
@@ -204,6 +207,10 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         }).catch((err) => {
             DLOG("[WebviewControllerElement] Failed to fetch user groups from AndroidBridge: " + err);
         }).finally(() => {
+            if(this._rooms.size === 0) {
+                DLOG("[WebviewControllerElement] No user groups found, showing side menu!");
+                this._popover.showPopover();
+            }
             AndroidBridge.hideLoadingDialog();
         });
     }
@@ -215,7 +222,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
     private _input!: HTMLInputElement;
 
     @query("#menu_popover", true)
-    private _popover!: HTMLDivElement;
+    private _popover!: SideMenuElment;
 
     private _sentIds = new Set<string>();
 
