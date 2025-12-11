@@ -49,6 +49,7 @@ export class ChatRoomElement extends LitElement {
     @queryAssignedElements()
     private current_messages!: Array<HTMLElement>
 
+    //todo stage by stage logging
     protected override firstUpdated(_changedProperties: PropertyValues): void {
         super.firstUpdated(_changedProperties);
         AndroidBridge.showLoadingDialog();

@@ -1,5 +1,5 @@
 ﻿import "./Components/WebviewControllerElement"
-import { ChatMessage, GroupInfo, GetMessagesRequest, GetMessagesResponse } from "./Generated/chat";
+import { ChatMessage, GroupInfo, GetMessagesRequest, GetMessagesResponse, GetUserGroupsRequest, GetUserGroupsResponse } from "./Generated/chat";
 import { IWebviewController, IWebviewControllerDecoder, IWebviewControllerEncoder } from "./Interfaces/IWebviewController";
 import * as signalR from "@microsoft/signalr";
 import "./base.css";
@@ -125,7 +125,10 @@ customElements.whenDefined('webview-controller').then(() => {
     },
     decodeChatMessageHistoryRequestResponse(b64: string) { 
       return GetMessagesResponse.decode(this.toByteArray(b64)).messages;
-    }
+    },
+    decodeGetUserGroupsResponse(b64) {
+      return GetUserGroupsResponse.decode(this.toByteArray(b64)).groups;
+    },
   }
   window["WebviewControllerEncoder"] = { 
     encodeChatMessage(message: ChatMessage) {
@@ -137,6 +140,9 @@ customElements.whenDefined('webview-controller').then(() => {
     encodeChatMessageHistoryRequest(request: GetMessagesRequest) {
       return btoa(String.fromCharCode(...GetMessagesRequest.encode(request).finish()));
     },
+    encodeGetUserGroupsRequest(request: GetUserGroupsRequest) {
+      return btoa(String.fromCharCode(...GetUserGroupsRequest.encode(request).finish()));
+    }
   }
 
   const CHAT_SERVICE_URL = "http://10.0.2.2:5066";
@@ -194,17 +200,15 @@ customElements.whenDefined('webview-controller').then(() => {
   window.AsyncAndroidBridge = { 
     async requestMessageHistory(GetMessagesRequest_b64) {
       const id = crypto.randomUUID();
-      const promise = Promiser.registerNewPromise<string[]>(id);
+      const promise = Promiser.registerNewPromise<string>(id);
       (AndroidBridge as any).requestMessageHistory(GetMessagesRequest_b64, id);
-      const messages = await promise;
-      return messages.map(b64 => WebviewControllerDecoder.decodeChatMessage(b64));
+      return WebviewControllerDecoder.decodeChatMessageHistoryRequestResponse(await promise);
     },
     async requestUserGroups() {
       const id = crypto.randomUUID();
-      const promise = Promiser.registerNewPromise<string[]>(id);
+      const promise = Promiser.registerNewPromise<string>(id);
       (AndroidBridge as any).requestUserGroups(id);
-      const groups_b64 = await promise;
-      return groups_b64.map(b64 => WebviewControllerDecoder.decodeChatRoom(b64));
+      return WebviewControllerDecoder.decodeGetUserGroupsResponse(await promise);
     }
   }
   

@@ -204,20 +204,34 @@ public class ChatWebviewOwnerFragment extends Fragment {
                 Log.e(TAG, "Failed to parse message history request: " + e.getMessage());
                 return;
             }
-            //todo Make the grpc call here. pass the response to this.resolveResponse()
+            //todo Make the grpc call here. pass the response to this.resolvePromisedResponse(response, request_id) to update JS
+            // or rejectPromisedResponse on error
         }
 
         @JavascriptInterface
         public void requestUserGroups(String request_id) {
             GetUserGroupsRequest req = GetUserGroupsRequest.newBuilder().setUserId(userId).build();
-            //todo Make the grpc call here. pass the response to this.resolveResponse() to update JS
+            //todo Make the grpc call here. pass the response to this.resolvePromisedResponse(response, request_id) to update JS
+            // or rejectPromisedResponse on error
         }
 
         public boolean getLoaded() { return loaded; }
 
-        public void resolveResponse(MessageLite response, String request_id) {
+        private void resolvePromisedResponse(MessageLite response, String request_id) {
             handler.post(() -> {
+                //todo
+                fragment.withLoadedWebview(webview -> {
 
+                });
+            });
+        }
+
+        private void rejectPromisedResponse(String error, String request_id) {
+            handler.post(() -> {
+                //todo
+                fragment.withLoadedWebview(webview -> {
+
+                });
             });
         }
 
