@@ -79,6 +79,7 @@ public class ChatWebviewOwnerFragment extends Fragment {
         }, controller);
         webview.addJavascriptInterface(bridge, "AndroidBridge");
         webview.loadUrl("https://appassets.androidplatform.net/assets/index.html");
+        //todo fail if chromium < 125.0
         Log.d("ChatWebviewOwnerFragment", "Using chromium version " + WebView.getCurrentWebViewPackage().versionName);
     }
 

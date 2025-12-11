@@ -1,6 +1,7 @@
 // use array of rooms + state index
 import "./ChatRoomElement"
 import "./SideMenuElement"
+import "../init"
 import { css, html, LitElement, PropertyValues } from "lit";
 import { IWebviewController } from "../Interfaces/IWebviewController";
 import { IChatMessage } from "../Interfaces/IChatMessage";
@@ -10,9 +11,15 @@ import { customElement, query, state } from "lit/decorators.js";
 import { map } from "lit/directives/map.js";
 import { ChatMessage } from "../Generated/chat";
 import { randomUUID } from "crypto";
+import { ensureInitialized } from "../init";
 
 @customElement("webview-controller")
 export class WebviewControllerElement extends LitElement implements IWebviewController {
+    constructor() {
+        super();
+        window.WebviewController = this;
+        ensureInitialized();
+    }
     addRoom(room: IChatRoom): boolean {
         if(!room) {
             DLOG("[WebviewControllerElement] Failed to add room because argument was nullish!");
