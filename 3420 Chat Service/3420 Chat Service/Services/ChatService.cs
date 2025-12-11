@@ -15,13 +15,15 @@ namespace _3420_Chat_Service.Services
         private readonly ILogger<ChatGrpcService> _logger;
         private readonly AuthService.AuthServiceClient _authClient;
         private readonly AppDbContext _dbContext;
+        private readonly AuthDbContext _authDbContext;
 
-        public ChatGrpcService(IHubContext<ChatHub> hubContext, ILogger<ChatGrpcService> logger, IConfiguration configuration, AppDbContext dbContext)
+        public ChatGrpcService(IHubContext<ChatHub> hubContext, ILogger<ChatGrpcService> logger, IConfiguration configuration, AppDbContext dbContext, AuthDbContext authDbContext)
         {
             _hubContext = hubContext;
             _logger = logger;
             _dbContext = dbContext;
-            
+            _authDbContext = authDbContext;
+
             var authServerUrl = configuration["AuthServer:Url"] ?? "http://24.236.104.52r:55101";
             var channel = GrpcChannel.ForAddress(authServerUrl);
             _authClient = new AuthService.AuthServiceClient(channel);
@@ -129,6 +131,9 @@ namespace _3420_Chat_Service.Services
                 _dbContext.GroupMembers.Add(groupMember);
                 await _dbContext.SaveChangesAsync();
 
+                // Notify the creator via SignalR that they were added to the group
+                await _hubContext.Clients.User(request.UserId).SendAsync("GroupAdded", group.Id.ToString(), group.GroupName);
+
                 return new CreateGroupResponse
                 {
                     Success = true,
@@ -168,6 +173,14 @@ namespace _3420_Chat_Service.Services
                 _dbContext.GroupMembers.Add(groupMember);
                 await _dbContext.SaveChangesAsync();
 
+                // Get the group name to send in the notification
+                var group = await _dbContext.Groups.FindAsync(groupId);
+                if (group != null)
+                {
+                    // Notify the added user via SignalR that they were added to the group
+                    await _hubContext.Clients.User(request.UserId).SendAsync("GroupAdded", groupId.ToString(), group.GroupName);
+                }
+
                 return new AddUserToGroupResponse { Success = true };
             }
             catch (Exception ex)
@@ -199,6 +212,38 @@ namespace _3420_Chat_Service.Services
             {
                 _logger.LogError(ex, "Error getting user groups: {Error}", ex.Message);
                 return new GetUserGroupsResponse();
+            }
+        }
+
+        public override async Task<SearchUsersResponse> SearchUsers(SearchUsersRequest request, ServerCallContext context)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(request.Query))
+                {
+                    return new SearchUsersResponse();
+                }
+
+                var query = request.Query.Trim().ToLower();
+
+                var users = await _authDbContext.Users
+                    .Where(u => u.Email.ToLower().Contains(query) || u.DisplayName.ToLower().Contains(query))
+                    .Select(u => new UserInfo
+                    {
+                        UserId = u.Id.ToString(),
+                        Email = u.Email,
+                        DisplayName = u.DisplayName
+                    })
+                    .ToListAsync();
+
+                var response = new SearchUsersResponse();
+                response.Users.AddRange(users);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching users: {Error}", ex.Message);
+                return new SearchUsersResponse();
             }
         }
     }

@@ -61,10 +61,25 @@ message GetUserGroupsResponse {
   repeated GroupInfo groups = 1;
 }
 
+message SearchUsersRequest {
+  string query = 1;
+}
+
+message UserInfo {
+  string userId = 1;
+  string email = 2;
+  string displayName = 3;
+}
+
+message SearchUsersResponse {
+  repeated UserInfo users = 1;
+}
+
 service ChatService {
   rpc SendMessage(ChatMessage) returns (SendMessageResponse);
   rpc GetMessages(GetMessagesRequest) returns (GetMessagesResponse);
   rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse);
   rpc AddUserToGroup(AddUserToGroupRequest) returns (AddUserToGroupResponse);
   rpc GetUserGroups(GetUserGroupsRequest) returns (GetUserGroupsResponse);
+  rpc SearchUsers(SearchUsersRequest) returns (SearchUsersResponse);
 }

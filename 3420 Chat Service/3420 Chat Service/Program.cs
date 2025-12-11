@@ -2,6 +2,7 @@ using _3420_Chat_Service.Services;
 using _3420_Chat_Service.Hubs;
 using _3420_Chat_Service.Data;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,11 +23,16 @@ builder.WebHost.ConfigureKestrel(options =>
     });
 });
 
-// Add Entity Framework
+// Add Entity Framework - PostgreSQL for chat data
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Add Entity Framework - MySQL for auth/user data (read-only)
+builder.Services.AddDbContext<AuthDbContext>(options =>
+    options.UseMySQL(builder.Configuration.GetConnectionString("AuthConnection") ?? "Server=localhost;Port=3306;Database=chatapp_users;Uid=admin;Pwd=pass0!QAZ;"));
+
 builder.Services.AddGrpc();
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 builder.Services.AddSignalR()
     .AddStackExchangeRedis(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379");
 
