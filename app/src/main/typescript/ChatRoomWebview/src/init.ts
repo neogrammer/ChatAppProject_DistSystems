@@ -162,5 +162,5 @@ export function ensureInitialized() {
         }
     }
     
-    AndroidBridge.setLoaded();
+    customElements.whenDefined("webview-controller").then(() => {AndroidBridge.setLoaded()});
 }

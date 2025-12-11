@@ -49,7 +49,6 @@ export class ChatRoomElement extends LitElement {
     @queryAssignedElements()
     private current_messages!: Array<HTMLElement>
 
-    //todo stage by stage logging
     protected override firstUpdated(_changedProperties: PropertyValues): void {
         super.firstUpdated(_changedProperties);
         AndroidBridge.showLoadingDialog();
@@ -57,10 +56,14 @@ export class ChatRoomElement extends LitElement {
         // subscribe to message stream
         connection.invoke("JoinGroup", this.roomId)
             // get history
-            .then(() => AsyncAndroidBridge.requestMessageHistory(WebviewControllerEncoder.encodeChatMessageHistoryRequest({groupId: this.roomId})))
+            .then(() => {
+                DLOG(`[ChatRoomElement] Subscribed to message stream for roomId '${this.roomId}', fetching history...`);
+                return AsyncAndroidBridge.requestMessageHistory(WebviewControllerEncoder.encodeChatMessageHistoryRequest({groupId: this.roomId}))
+            })
             // after subscription started and history fetched, prune duplicates 
             // (streamed message could have been committed to history between requests)
             .then((messages: ChatMessage[]) => {
+                DLOG(`[ChatRoomElement] Received ${messages.length} historical messages for roomId '${this.roomId}'. Pruning duplicates...`);
                 this.current_messages?.forEach((elem) => {
                     const idx = messages.findIndex((msg) => ("m" + msg.id) === elem.id);
                     if(idx !== -1) messages.splice(idx, 1); // remove duplicate
@@ -79,6 +82,7 @@ export class ChatRoomElement extends LitElement {
             })
             // hide loading dialog after it's all done
             .finally(() => {
+                DLOG(`[ChatRoomElement] Finished initial setup for roomId '${this.roomId}'.`);
                 AndroidBridge.hideLoadingDialog();
             });
     }
