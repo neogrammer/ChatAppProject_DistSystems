@@ -38,6 +38,7 @@ import ink.bluballz.chat.v1.ChatMessage;
 import ink.bluballz.chat.v1.CreateGroupRequest;
 import ink.bluballz.chat.v1.GetMessagesRequest;
 import ink.bluballz.chat.v1.GetUserGroupsRequest;
+import ink.bluballz.chat.v1.SearchUsersRequest;
 
 public class ChatWebviewOwnerFragment extends Fragment {
     public static final String TAG = "WebviewOwnerFragment";
@@ -225,7 +226,7 @@ public class ChatWebviewOwnerFragment extends Fragment {
 
         @JavascriptInterface
         public void searchUsers(String substring, String request_id) {
-            //todo make the protobuf object
+            SearchUsersRequest req = SearchUsersRequest.newBuilder().setQuery(substring).build();
 
             //todo Make the grpc call here. pass the response to this.resolvePromisedResponse(response, request_id) to update JS
             // or rejectPromisedResponse on error

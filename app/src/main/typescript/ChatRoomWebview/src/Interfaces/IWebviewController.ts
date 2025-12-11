@@ -1,6 +1,5 @@
-import { ChatMessage, CreateGroupResponse, GetMessagesRequest, GetUserGroupsRequest, GroupInfo } from "../Generated/chat";
+import { AddUserToGroupResponse, ChatMessage, CreateGroupResponse, GetMessagesRequest, GetUserGroupsRequest, GroupInfo, SearchUsersResponse } from "../Generated/chat";
 import type { IElementConvertable } from "./IElementConvertable";
-import { ISearchResult } from "./ISearchResult";
 
 export type Base64String = string;
 
@@ -23,8 +22,9 @@ export interface IWebviewControllerDecoder {
     decodeChatMessage(b64: Base64String): ChatMessage;
     decodeChatMessageHistoryRequestResponse(b64: Base64String): ChatMessage[];
     decodeGetUserGroupsResponse(b64: Base64String): GroupInfo[];
-    decodeSearchResult(b64: Base64String): ISearchResult;
+    decodeSearchResult(b64: Base64String): SearchUsersResponse;
     decodeCreateGroupResponse(b64: Base64String): CreateGroupResponse;
+    decodeAddUserToGroupResponse(b64: Base64String): boolean;
     toByteArray(b64: Base64String): Uint8Array;
 }
 

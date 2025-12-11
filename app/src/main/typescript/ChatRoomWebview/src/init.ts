@@ -1,5 +1,5 @@
 import * as signalR from "@microsoft/signalr";
-import { ChatMessage, CreateGroupResponse, GetMessagesRequest, GetMessagesResponse, GetUserGroupsRequest, GetUserGroupsResponse, GroupInfo } from "./Generated/chat";
+import { AddUserToGroupResponse, ChatMessage, CreateGroupResponse, GetMessagesRequest, GetMessagesResponse, GetUserGroupsRequest, GetUserGroupsResponse, GroupInfo, SearchUsersResponse } from "./Generated/chat";
 
 let initialized = false;
 
@@ -105,13 +105,22 @@ export function ensureInitialized() {
             return GetUserGroupsResponse.decode(this.toByteArray(b64)).groups;
         },
         /**
-         * Placeholder decoder for search results.
+         * Decoder for search results.
          */
         decodeSearchResult(b64: string) {
-            return {results: []}; //todo
+            return SearchUsersResponse.decode(this.toByteArray(b64))
         },
+        /**
+         * Decoder for create group response
+         */
         decodeCreateGroupResponse(b64) {
             return CreateGroupResponse.decode(this.toByteArray(b64));
+        },
+        /**
+         * Decoder for add user to group response
+         */
+        decodeAddUserToGroupResponse(b64) {
+            return AddUserToGroupResponse.decode(this.toByteArray(b64)).success;
         },
     }
     /**
@@ -235,7 +244,7 @@ export function ensureInitialized() {
          */
         async searchUsers(substring: string) {
             if(substring.length === 0) {
-                return {results: []};
+                return {users: []};
             }
             const id = crypto.randomUUID();
             const promise = Promiser.registerNewPromise<string>(id);
@@ -253,6 +262,16 @@ export function ensureInitialized() {
             const promise = Promiser.registerNewPromise<string>(id);
             (AndroidBridge as any).createGroup(name, id);
             return WebviewControllerDecoder.decodeCreateGroupResponse(await promise);
+        },
+
+        async addUserToGroup(userId, groupId) {
+            if(userId.length === 0 || groupId.length === 0) {
+                return false;
+            }
+            const id = crypto.randomUUID();
+            const promise = Promiser.registerNewPromise<string>(id);
+            (AndroidBridge as any).addUserToGroup(userId, groupId, id);
+            return WebviewControllerDecoder.decodeAddUserToGroupResponse(await promise);
         },
     }
     
