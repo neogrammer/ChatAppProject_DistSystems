@@ -240,6 +240,7 @@ public class ChatWebviewOwnerFragment extends Fragment {
             // or rejectPromisedResponse on error
         }
 
+        @JavascriptInterface
         public void addUserToGroup(String userId, String groupId, String request_id) {
             AddUserToGroupRequest req = AddUserToGroupRequest.newBuilder().setGroupId(groupId).setUserId(userId).build();
 
