@@ -1,4 +1,4 @@
-import { ChatMessage, GetMessagesRequest, GroupInfo } from "../Generated/chat";
+import { ChatMessage, GetMessagesRequest, GetUserGroupsRequest, GroupInfo } from "../Generated/chat";
 import { IChatMessage } from "./IChatMessage";
 import { IChatRoom } from "./IChatRoom";
 import type { IElementConvertable } from "./IElementConvertable";
@@ -23,6 +23,7 @@ export interface IWebviewControllerDecoder {
     decodeChatRoom(b64: string): GroupInfo;
     decodeChatMessage(b64: string): ChatMessage;
     decodeChatMessageHistoryRequestResponse(b64: string): ChatMessage[];
+    decodeGetUserGroupsResponse(b64: string): GroupInfo[];
     toByteArray(b64: string): Uint8Array;
 }
 
@@ -30,4 +31,5 @@ export interface IWebviewControllerEncoder {
     encodeGroupInfo(room: GroupInfo): string;
     encodeChatMessage(message: ChatMessage): string;
     encodeChatMessageHistoryRequest(request: GetMessagesRequest): string;
+    encodeGetUserGroupsRequest(request: GetUserGroupsRequest): string;
 }
