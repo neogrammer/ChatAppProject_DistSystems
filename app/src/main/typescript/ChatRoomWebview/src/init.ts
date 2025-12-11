@@ -79,6 +79,9 @@ export function ensureInitialized() {
         decodeGetUserGroupsResponse(b64) {
             return GetUserGroupsResponse.decode(this.toByteArray(b64)).groups;
         },
+        decodeSearchResult(b64: string) {
+            return {results: []}; //todo
+        }
     }
     window["WebviewControllerEncoder"] = { 
         encodeChatMessage(message: ChatMessage) {
@@ -121,7 +124,7 @@ export function ensureInitialized() {
         //   DLOG(`joined room: ${ROOM_ID}`);
         // })
         .catch(err => {
-        console.error("signalr connection error:", err);
+            console.error("signalr connection error:", err);
         });
 
     window.Promiser = {
@@ -159,8 +162,43 @@ export function ensureInitialized() {
             const promise = Promiser.registerNewPromise<string>(id);
             (AndroidBridge as any).requestUserGroups(id);
             return WebviewControllerDecoder.decodeGetUserGroupsResponse(await promise);
+        },
+        async searchUsers(substring: string) {
+            if(substring.length === 0) {
+                return {results: []};
+            }
+            const id = crypto.randomUUID();
+            const promise = Promiser.registerNewPromise<string>(id);
+            (AndroidBridge as any).searchUsers(substring, id);
+            return WebviewControllerDecoder.decodeSearchResult(await promise);
         }
     }
     
     customElements.whenDefined("webview-controller").then(() => {AndroidBridge.setLoaded()});
+}
+
+function enableMockComponents() {
+    window.AndroidBridge ??= {
+        getUserId() {
+            return "0"
+        },
+        getUserName() {
+            return "Tyler"
+        },
+        postMessage(ChatMessage_b64: string) {
+            WebviewController.addMessage(WebviewControllerDecoder.decodeChatMessage(ChatMessage_b64));
+        },
+        setLoaded() {
+            DLOG("setLoaded called");
+        },
+        showLoadingDialog() {
+            DLOG("showLoadingDialog called");
+        },
+        hideLoadingDialog() {
+            DLOG("hideLoadingDialog called");
+        },
+        requestMessageHistory(GetMessagesRequest_b64: string, id: string) {},
+        requestUserGroups(id: string) {},
+        searchUsers(substring: string, id: string) {}
+    } as any;
 }
