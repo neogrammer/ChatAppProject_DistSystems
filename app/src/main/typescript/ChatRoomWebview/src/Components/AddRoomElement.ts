@@ -1,31 +1,17 @@
 import { css, html, LitElement, PropertyValues } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
-import { ISearchResultItem } from "../Interfaces/ISearchResult";
+import { ISearchResult, ISearchResultItem } from "../Interfaces/ISearchResult";
 
 @customElement("add-room")
 export class AddRoomElement extends LitElement {
     override connectedCallback(): void { 
         super.connectedCallback();
         this.addEventListener("toggle", this.onHostToggled);
-        //todo add search result received event
     }
 
     override disconnectedCallback(): void {
         super.disconnectedCallback();
         this.removeEventListener("toggle", this.onHostToggled);
-        //todo remove search result received event
-    }
-
-    protected override firstUpdated(_changedProperties: PropertyValues): void {
-        super.firstUpdated(_changedProperties);
-        // setTimeout(() => {
-        //     this._search_popover.showPopover();
-        // }, 5000);
-    }
-
-    // todo add params with correct proto types
-    setSearchResults() {
-        // todo populate result list element with results and show if needed
     }
 
     protected override render() { 
@@ -43,7 +29,7 @@ export class AddRoomElement extends LitElement {
                             id="room_name_input"
                             class="text-input"
                             placeholder="Enter new room name..."
-                            @input="${this.onNameInput}"/>
+                            @change="${this.onNameChange}"/>
                     </div>
 
                     <!-- Users row -->
@@ -54,7 +40,7 @@ export class AddRoomElement extends LitElement {
                             id="user_search_input"
                             class="text-input"
                             placeholder="Search for users to add..."
-                            @input="${this.onSearchInput}"/>
+                            @change="${this.onSearchChange}"/>
                         <svg id="search_icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#242424"><path d="M0 0h24v24H0z" fill="none" /><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
                         </div>
                     </div>
@@ -87,7 +73,20 @@ export class AddRoomElement extends LitElement {
                     </div>
 
                     <div id="user_search_popover" popover="manual" @toggle="${this.onSearchPopoverToggled}">
-                        <span>Test Test Test Test Test Test Test Test Test Test </span>
+                        ${this._current_search_result_items.map((user) => html`
+                                <label class="search-result-item">
+                                    <div class="search-result-text">
+                                        <div class="search-result-display-name"> ${user.displayName}</div>
+                                        <div class="search-result-email">${user.email}</div>
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        class="search-result-checkbox"
+                                        @change=${(e: Event) => this.onUserSearchCheckboxChanged(user, (e.currentTarget as HTMLInputElement).checked)}
+                                    />
+                                </label>
+                            `
+                        )}
                     </div>
                 </div>
             </div>
@@ -98,14 +97,23 @@ export class AddRoomElement extends LitElement {
     private onCancel() { this.hidePopover(); }
 
     //set submittable if names non empty and this isnt empty
-    private onNameInput(event: InputEvent) {
+    private onNameChange(event: InputEvent) {
         const input = event.currentTarget as HTMLInputElement;
         this.submittable = input.value.length > 0 && this._selected_users.length > 0;
     }
 
     private onHostToggled = (event: ToggleEvent) => {
         if(event.newState === "closed") { 
-            //todo reset form
+            clearTimeout(this.onSearchChange.timeout);
+            this._name_input.value = "";
+            this._search_input.value = "";
+            this._selected_users = [];
+            this._current_search_result_items = [];
+            this.submittable = false;
+            this.onSearchChange.result?.then(() => {
+                this._current_search_result_items = [];
+                this.onSearchChange.result = undefined;
+            });
         }
     }
 
@@ -119,13 +127,45 @@ export class AddRoomElement extends LitElement {
         }
     }
 
-    private readonly onSearchInput = {
+    private readonly onSearchChange = {
         timeout: undefined as ReturnType<typeof setTimeout> | undefined,
+        result: undefined as Promise<ISearchResult> | undefined,
         handleEvent: (event: InputEvent) => {
-            clearTimeout(this.onSearchInput.timeout);
-            this.onSearchInput.timeout = setTimeout(() => {
-                //todo set searching class, send off search request
+            clearTimeout(this.onSearchChange.timeout);
+            this.removeAttribute("searching");
+            this.onSearchChange.result = undefined;
+
+            this.onSearchChange.timeout = setTimeout(() => {
+                this.setAttribute("searching", "");
+                const promise = window.AsyncAndroidBridge.searchUsers((event.currentTarget as HTMLInputElement).value);
+                promise.then(result => {
+                    if(promise !== this.onSearchChange.result) return; // outdated result
+                    this._current_search_result_items = result.results;
+                    this.removeAttribute("searching");
+                    this._search_popover.showPopover();
+                });
+                this.onSearchChange.result = promise;
             }, 300);
+        }
+    }
+
+    private onUserSearchCheckboxChanged(user: ISearchResultItem, checked: boolean) {
+        if(checked) {
+            if(!this._selected_users.find(u => u.id === user.id)) {
+                this._selected_users.push(user);
+                this.requestUpdate("_selected_users");
+                this.submittable = this._name_input.value.length > 0 && this._selected_users.length > 0;
+                DLOG(`[AddRoomElement] Added user with id '${user.id}' to selected users.`);
+            }
+        }
+        else {
+            const index = this._selected_users.findIndex(u => u.id === user.id);
+            if(index !== -1) {
+                this._selected_users.splice(index, 1);
+                this.requestUpdate("_selected_users");
+                this.submittable = this._name_input.value.length > 0 && this._selected_users.length > 0;
+                DLOG(`[AddRoomElement] Removed user with id '${user.id}' from selected users.`);
+            }
         }
     }
 
@@ -161,6 +201,53 @@ export class AddRoomElement extends LitElement {
     private _current_search_result_items: ISearchResultItem[] = [];
 
     static styles = css`
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            padding: 4px 8px;
+            width: 100%;
+            box-sizing: border-box;
+
+            cursor: pointer;           /* was none, but this is interactive */
+        }
+
+        /* Left side: text block */
+        .search-result-text {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+            min-width: 0;              /* ⭐ REQUIRED for ellipsis in flex layouts */
+        }
+
+        /* First line: display name */
+        .search-result-display-name {
+            font-size: 14px;
+            line-height: 1.2;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Second line: email, smaller and slightly muted */
+        .search-result-email {
+            font-size: 12px;
+            line-height: 1.2;
+            opacity: 0.8;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Right side: checkbox, no stretching */
+        .search-result-checkbox {
+            flex: 0 0 auto;
+            margin: 0;
+        }
+
         .add-room-container {
             display: flex;
             flex-direction: column;
@@ -248,7 +335,7 @@ export class AddRoomElement extends LitElement {
             pointer-events: none;     /* decorative */
         }
 
-        #search_icon.searching {
+        :host([searching]) #search_icon {
             visibility: visible;
             animation: spin 1s linear infinite;
         }

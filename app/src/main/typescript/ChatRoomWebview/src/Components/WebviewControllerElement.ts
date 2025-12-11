@@ -48,14 +48,19 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         }
         if(roomId === this.current_room) {
             if(this._rooms.size === 1) {
-                DLOG("[WebviewControllerElement] Failed to remove room because doing so would leave the app roomless!");
-                return false;
+                this._popover.showPopover();
+                this.current_room = "";
+                this._rooms.clear();
+                this.requestUpdate("_rooms");
+                DLOG("[WebviewControllerElement] Removed last room, no rooms left! Switching to empty room view.");
+                return true;
             }
             const as_array = [...this._rooms];
             let new_index = [...this._rooms].findIndex(v => v[0] === roomId);
             if(new_index === 0) ++new_index;
             else --new_index;
             this.current_room = as_array[new_index][0];
+            DLOG("[WebviewControllerElement] Removed current room, switching to room " + this.current_room + ` (${as_array[new_index][1].name})`);
         }
 
         const return_val = this._rooms.delete(roomId);
@@ -242,6 +247,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         this._sentIds.add(message.id);
         const encoded = ChatMessage.encode(message).finish();
         window.AndroidBridge.postMessage(btoa(String.fromCharCode(...encoded)));
+        DLOG(`[WebviewControllerElement] Sent message ${message.content}`);
     }
 
     protected override render() {

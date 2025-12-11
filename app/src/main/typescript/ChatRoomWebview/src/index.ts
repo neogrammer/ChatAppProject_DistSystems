@@ -3,6 +3,7 @@ import { ChatMessage, GroupInfo, GetMessagesRequest, GetMessagesResponse, GetUse
 import { IWebviewController, IWebviewControllerDecoder, IWebviewControllerEncoder } from "./Interfaces/IWebviewController";
 import * as signalR from "@microsoft/signalr";
 import "./base.css";
+import { ISearchResult } from "./Interfaces/ISearchResult";
 
 declare global {
   const DEBUG: boolean;
@@ -33,6 +34,7 @@ declare global {
   interface IAsyncAndroidBridge {
     requestMessageHistory(GetMessagesRequest_b64: string): Promise<ChatMessage[]>;
     requestUserGroups(): Promise<GroupInfo[]>;
+    searchUsers(substring: string): Promise<ISearchResult>;
   }
 
   interface IPromiser {

@@ -221,6 +221,13 @@ public class ChatWebviewOwnerFragment extends Fragment {
             // or rejectPromisedResponse on error
         }
 
+        public void searchUsers(String substring, String request_id) {
+            //todo make the protobuf object
+
+            //todo Make the grpc call here. pass the response to this.resolvePromisedResponse(response, request_id) to update JS
+            // or rejectPromisedResponse on error
+        }
+
         public boolean getLoaded() { return loaded; }
 
         private void resolvePromisedResponse(MessageLite response, String request_id) {
