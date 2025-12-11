@@ -387,7 +387,10 @@ public class ChatWebviewOwnerFragment extends Fragment {
          */
         @JavascriptInterface
         public void searchUsers(String substring, String request_id) {
-            SearchUsersRequest req = SearchUsersRequest.newBuilder().setQuery(substring).build();
+            SearchUsersRequest req = SearchUsersRequest.newBuilder()
+                    .setQuery(substring)
+                    .setUserId(userId)
+                    .build();
 
             String accessToken = getAccessToken();
             if(accessToken.isEmpty()) return; //todo error dialog
