@@ -30,6 +30,28 @@ import java.util.Objects;
 import ink.bluballz.chat.v1.ChatMessage;
 //import ink.bluballz.chat.v1.ChatRoom;
 
+/**
+ * A fragment responsible for displaying the WebView
+ * <p>
+ * This fragment acts as a container for a WebView that is managed and owned by a
+ * {@link ChatWebviewOwnerFragment}. It retrieves the WebView from the owner
+ * and attaches it to its own view hierarchy. This pattern allows the WebView's state
+ * (and the loaded chat application) to be preserved across configuration changes or
+ * navigation events that would otherwise destroy this fragment.
+ * <p>
+ * To use this fragment, it must be created with a {@link Bundle} containing an
+ * {@link Arguments} object. The arguments must provide a {@code userId} and a
+ * {@code userName}, which are necessary to initialize the chat session in the WebView.
+ * This is done automatically with the navigation system.
+ * <p>
+ * It requires that a {@link ChatWebviewOwnerFragment} with the tag
+ * {@link ChatWebviewOwnerFragment#TAG} exists in the same {@link androidx.fragment.app.FragmentManager}.
+ * Failure to provide the required arguments or the owner fragment will result in a
+ * {@link RuntimeException}.
+ *
+ * @see ChatWebviewOwnerFragment
+ * @see Arguments
+ */
 public class ChatWebviewFragment extends Fragment /*implements IWebviewController*/ {
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,7 +67,6 @@ public class ChatWebviewFragment extends Fragment /*implements IWebviewControlle
         if(args_obj.userId == null || args_obj.userId.isBlank()) throw new RuntimeException("Can't construct chat webview without userId!");
         if(args_obj.userName == null || args_obj.userName.isBlank()) throw new RuntimeException("Can't construct chat webview without userName!");
         webview_owner.load(args_obj.userId, args_obj.userName, this);
-        //addRoom(ChatRoom.newBuilder().setId("main").setRoomName("Anonymous").build(), null);
     }
 
     @Override
@@ -65,18 +86,10 @@ public class ChatWebviewFragment extends Fragment /*implements IWebviewControlle
         });
     }
 
-//    @Override
-//    public void addRoom(ChatRoom room, @Nullable JSCallback<Boolean> callback) {
-//        webview_owner.withLoadedWebview(webview -> {
-//            String js = "window.WebviewController.addRoom("
-//                    + "window.WebviewControllerDecoder.decodeChatRoom("
-//                    + jsBase64Arg(room)
-//                    + "))";
-//
-//            webview.evaluateJavascript(js, callback != null ? r -> callback.execute("true".equals(r)) : null);
-//        });
-//    }
-
+    /**
+     * A parcelable class for passing arguments to the {@link ChatWebviewFragment}.
+     * This class encapsulates the necessary user information required to initialize the chat webview.
+     */
     public static class Arguments implements Parcelable {
         public final String userId;
         public final String userName;
@@ -113,46 +126,6 @@ public class ChatWebviewFragment extends Fragment /*implements IWebviewControlle
                 return new Arguments[size];
             }
         };
-    }
-
-    private static String jsString(String value) {
-        // Handles null → "null", as JSON should
-        return value == null ? "null" : JSONObject.quote(value);
-    }
-
-    private static String jsBase64Arg(MessageLite proto) {
-        // Base64 is JS-safe by definition
-        return JSONObject.quote(Base64.encodeToString(proto.toByteArray(), Base64.NO_WRAP));
-    }
-
-    private static String jsListOfBase64(MessageLite[] protos) {
-        if (protos.length == 0) return "[]";
-
-        StringBuilder out = new StringBuilder("[");
-        for (MessageLite p : protos) {
-            out.append("window.WebviewControllerDecoder.decodeChatMessage(")
-                    .append(jsBase64Arg(p))
-                    .append("),");
-        }
-        out.setLength(out.length() - 1); // strip trailing comma
-        out.append("]");
-        return out.toString();
-    }
-
-    private static String jsRemoveTupleList(RemoveMessageTuple[] tuples) {
-        if (tuples.length == 0) return "[]";
-
-        StringBuilder out = new StringBuilder("[");
-        for (RemoveMessageTuple t : tuples) {
-            out.append("[")
-                    .append(jsString(t.messageId))
-                    .append(",")
-                    .append(jsString(t.roomId))
-                    .append("],");
-        }
-        out.setLength(out.length() - 1);
-        out.append("]");
-        return out.toString();
     }
     private ChatWebviewOwnerFragment webview_owner;
 

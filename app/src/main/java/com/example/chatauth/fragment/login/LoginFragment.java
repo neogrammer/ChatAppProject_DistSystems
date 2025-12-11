@@ -21,6 +21,16 @@ import com.example.chatauth.databinding.FragmentLoginBinding;
 import com.example.chatauth.fragment.chat.ChatWebviewFragment;
 import com.example.chatauth.fragment.loading.LoadingDialogFragment;
 
+/**
+ * A {@link Fragment} that provides a user interface for logging in.
+ * <p>
+ * This fragment contains fields for email and password input. It uses a
+ * {@link LoginFragmentViewmodel} to manage the UI state, such as the input values
+ * and the enabled state of the login button. Upon a successful login attempt,
+ * it saves the authentication tokens and navigates to the {@link ChatWebviewFragment}.
+ * Any login errors are displayed to the user.
+ * </p>
+ */
 public class LoginFragment extends Fragment {
     private FragmentLoginBinding binding;
     private LoginFragmentViewmodel current_data;

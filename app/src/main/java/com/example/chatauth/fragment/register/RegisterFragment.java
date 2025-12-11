@@ -21,6 +21,20 @@ import com.example.chatauth.databinding.FragmentRegisterBinding;
 import com.example.chatauth.fragment.chat.ChatWebviewFragment;
 import com.example.chatauth.fragment.loading.LoadingDialogFragment;
 
+/**
+ * A {@link Fragment} for user registration.
+ *
+ * This fragment provides a user interface for new users to create an account. It includes
+ * fields for email, password, and display name. It handles user input validation to enable
+ * the registration button and communicates with a backend service to perform the registration.
+ *
+ * Upon successful registration, it saves the authentication tokens, and navigates the user
+ * to the {@link ChatWebviewFragment}. If registration fails,
+ * it displays an error message.
+ *
+ * This class uses a {@link RegisterFragmentViewmodel} to manage its UI state and data,
+ * ensuring data persistence across configuration changes.
+ */
 public class RegisterFragment extends Fragment {
 
     @Override

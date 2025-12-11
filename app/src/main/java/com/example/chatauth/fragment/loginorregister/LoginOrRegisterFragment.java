@@ -12,6 +12,13 @@ import android.view.ViewGroup;
 import com.example.chatauth.R;
 import com.example.chatauth.databinding.FragmentLoginOrRegisterBinding;
 
+/**
+ * A simple {@link Fragment} subclass that serves as the initial landing screen for the user.
+ * It presents the user with two choices: to log in or to register for a new account.
+ * User interactions with the "Login" or "Register" buttons will navigate them
+ * to the corresponding fragments ({@link com.example.chatauth.fragment.login.LoginFragment}
+ * or {@link com.example.chatauth.fragment.register.RegisterFragment}) using the Navigation Component.
+ */
 public class LoginOrRegisterFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

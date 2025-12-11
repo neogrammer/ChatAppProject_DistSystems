@@ -17,6 +17,13 @@ import com.example.chatauth.fragment.chat.ChatWebviewOwnerFragment;
 
 import java.lang.ref.WeakReference;
 
+/**
+ * The main entry point of the application.
+ * This activity is responsible for setting up the main view, initializing view models,
+ * managing window insets, and adding the primary fragment that hosts the chat WebView.
+ * It also maintains a static reference to itself for global access within the app,
+ * although this is generally discouraged, it's used here for simplicity.
+ */
 public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
