@@ -1,8 +1,7 @@
 import { css, html, LitElement, PropertyValues } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
-import { ISearchResult, ISearchResultItem } from "../Interfaces/ISearchResult";
 import { WebviewControllerElement } from "./WebviewControllerElement";
-import { CreateGroupResponse } from "../Generated/chat";
+import { CreateGroupResponse, SearchUsersResponse, UserInfo } from "../Generated/chat";
 
 // Popover form for creating a new chat room
 @customElement("add-room")
@@ -61,7 +60,7 @@ export class AddRoomElement extends LitElement {
                          ${this._selected_users.map(user => html`
                             <div class="user-bubble">
                                 <span class="user-name">${user.displayName}</span>
-                                <button class="user-remove-btn" for-id=${user.id} @click="${this.onRemoveSelectedUser}">X</button>
+                                <button class="user-remove-btn" for-id=${user.userId} @click="${this.onRemoveSelectedUser}">X</button>
                             </div>
                          `)}
 
@@ -120,7 +119,7 @@ export class AddRoomElement extends LitElement {
         }).then(_v => {
             // add users to group
             DLOG("[AddRoomElement] Adding " + users.length + " users to chat room!");
-            return Promise.allSettled(users.map(v => AsyncAndroidBridge.addUserToGroup(v.id, response.groupId)));
+            return Promise.allSettled(users.map(v => AsyncAndroidBridge.addUserToGroup(v.userId, response.groupId)));
         }).then(added_results => {
             let error_counter = 0;
             for(const result of added_results) {
@@ -178,7 +177,7 @@ export class AddRoomElement extends LitElement {
     // Event listener that gets search results as you type (debounced by 300ms)
     private readonly onSearchChange = {
         timeout: undefined as ReturnType<typeof setTimeout> | undefined,
-        result: undefined as Promise<ISearchResult> | undefined,
+        result: undefined as Promise<SearchUsersResponse> | undefined,
         handleEvent: (event: InputEvent) => {
             clearTimeout(this.onSearchChange.timeout);
             this.removeAttribute("searching");
@@ -190,7 +189,7 @@ export class AddRoomElement extends LitElement {
                 this.onSearchChange.result = promise;
                 promise.then(result => {
                     if(promise !== this.onSearchChange.result) return; // outdated result
-                    this._current_search_result_items = result.results;
+                    this._current_search_result_items = result.users;
                     this.removeAttribute("searching");
                     this._search_popover.showPopover();
                 });
@@ -199,22 +198,22 @@ export class AddRoomElement extends LitElement {
     }
 
     // Adds a user to the selected list when they're checked in the search result list popover.
-    private onUserSearchCheckboxChanged(user: ISearchResultItem, checked: boolean) {
+    private onUserSearchCheckboxChanged(user: UserInfo, checked: boolean) {
         if(checked) {
-            if(!this._selected_users.find(u => u.id === user.id)) {
+            if(!this._selected_users.find(u => u.userId === user.userId)) {
                 this._selected_users.push(user);
                 this.requestUpdate("_selected_users");
                 this.submittable = this._name_input.value.length > 0 && this._selected_users.length > 0;
-                DLOG(`[AddRoomElement] Added user with id '${user.id}' to selected users.`);
+                DLOG(`[AddRoomElement] Added user with id '${user.userId}' to selected users.`);
             }
         }
         else {
-            const index = this._selected_users.findIndex(u => u.id === user.id);
+            const index = this._selected_users.findIndex(u => u.userId === user.userId);
             if(index !== -1) {
                 this._selected_users.splice(index, 1);
                 this.requestUpdate("_selected_users");
                 this.submittable = this._name_input.value.length > 0 && this._selected_users.length > 0;
-                DLOG(`[AddRoomElement] Removed user with id '${user.id}' from selected users.`);
+                DLOG(`[AddRoomElement] Removed user with id '${user.userId}' from selected users.`);
             }
         }
     }
@@ -223,7 +222,7 @@ export class AddRoomElement extends LitElement {
     private onRemoveSelectedUser(event: MouseEvent) { 
         const button = event.currentTarget as HTMLButtonElement;
         const userId = button.getAttribute("for-id");
-        const index = this._selected_users.findIndex(user => user.id === userId);
+        const index = this._selected_users.findIndex(user => user.userId === userId);
         if(index !== -1) {
             this._selected_users.splice(index, 1);
             this.requestUpdate("_selected_users");
@@ -246,10 +245,10 @@ export class AddRoomElement extends LitElement {
     private submittable = false;
 
     @state()
-    private _selected_users: ISearchResultItem[] = [];
+    private _selected_users: UserInfo[] = [];
 
     @state()
-    private _current_search_result_items: ISearchResultItem[] = [];
+    private _current_search_result_items: UserInfo[] = [];
 
     static styles = css`
         .search-result-item {

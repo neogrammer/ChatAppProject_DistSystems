@@ -1,9 +1,8 @@
 ﻿import "./Components/WebviewControllerElement"
-import { ChatMessage, GroupInfo, GetMessagesRequest, GetMessagesResponse, GetUserGroupsRequest, GetUserGroupsResponse, CreateGroupResponse } from "./Generated/chat";
+import { ChatMessage, GroupInfo, GetMessagesRequest, GetMessagesResponse, GetUserGroupsRequest, GetUserGroupsResponse, CreateGroupResponse, SearchUsersResponse } from "./Generated/chat";
 import { IWebviewController, IWebviewControllerDecoder, IWebviewControllerEncoder } from "./Interfaces/IWebviewController";
 import * as signalR from "@microsoft/signalr";
 import "./base.css";
-import { ISearchResult } from "./Interfaces/ISearchResult";
 
 declare global {
   const DEBUG: boolean;
@@ -45,7 +44,7 @@ declare global {
     requestUserGroups(): Promise<GroupInfo[]>;
 
     // Returns a promise that resolves to an ISearchResult for users matching the substring
-    searchUsers(substring: string): Promise<ISearchResult>;
+    searchUsers(substring: string): Promise<SearchUsersResponse>;
 
     // Creates a group with the given name with the current user as the initial user
     createGroup(name: string): Promise<CreateGroupResponse>;
