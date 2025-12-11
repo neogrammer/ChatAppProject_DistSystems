@@ -4,6 +4,7 @@ import { css, html, LitElement } from "lit"
 import { customElement, query } from "lit/decorators.js";
 import { AddRoomElement } from "./AddRoomElement";
 
+// Represents 'side menu' that contains a list of rooms and the ability to create a new chat room
 @customElement("side-menu")
 export class SideMenuElment extends LitElement {
 
@@ -24,10 +25,12 @@ export class SideMenuElment extends LitElement {
     @query("#add_room_popover", true)
     private _add_room_popover!: AddRoomElement;
 
+    // Adds a listener that closes the AddRoomElement popover when a click happens outside of it (to patch behavior of multiple built-in popovers)
     private onAddRoomToggled(event: ToggleEvent) {
         event.newState === "open" ? this.addEventListener("click", this.onClickedWhileAddRoomOpen) : this.removeEventListener("click", this.onClickedWhileAddRoomOpen);
     }
 
+    // Listener used in onAddRoomToggled
     private onClickedWhileAddRoomOpen = (event: MouseEvent) => {
         if(!(event.composedPath().includes(this._add_room_popover))) {
             this._add_room_popover.hidePopover();

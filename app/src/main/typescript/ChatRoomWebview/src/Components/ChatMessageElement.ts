@@ -2,7 +2,7 @@ import { css, CSSResultGroup, html, LitElement, PropertyValues } from "lit";
 import type { IChatMessage, IChatMessageRoomUnaware } from "../Interfaces/IChatMessage";
 import { customElement, property, state } from "lit/decorators.js";
 
-// remember to set its id
+// Simple element that represents a ChatMessage
 @customElement("chat-message")
 export class ChatMessageElement extends LitElement {
     @property({attribute: "user-id", reflect: true})
