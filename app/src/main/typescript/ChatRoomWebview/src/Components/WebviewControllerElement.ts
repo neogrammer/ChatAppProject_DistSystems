@@ -223,7 +223,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         }).finally(() => {
             if(this._rooms.size === 0) {
                 DLOG("[WebviewControllerElement] No user groups found, showing side menu!");
-                this._popover.showPopover();
+                this.updateComplete.then(() => this._popover.showPopover());
             }
             AndroidBridge.hideLoadingDialog();
         });
@@ -233,10 +233,10 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
     private current_room = "";
 
     @query("#msg_input", true)
-    private _input!: HTMLInputElement;
+    private accessor _input!: HTMLInputElement;
 
     @query("#menu_popover", true)
-    private _popover!: SideMenuElment;
+    private accessor _popover!: SideMenuElment;
 
     private _sentIds = new Set<string>();
 
@@ -267,16 +267,14 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
     }
 
     protected override render() {
-        if(this.current_room.length === 0) return html``;
         const room = this._rooms.get(this.current_room); //todo use when()
-        if(!room) return html``;
 
         return html`
             <div id="room_header" class="header">
                 <button popovertarget="menu_popover" class="spacer">
                     <svg xmlns="http://www.w3.org/2000/svg" class="button" height="24px" viewBox="0 0 24 24" width="24px" fill="#242424"><path d="M0 0h24v24H0z" fill="none"/><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
                 </button>
-                <span id="room_name" class="header-text">${room.name}</span>
+                <span id="room_name" class="header-text">${room?.name || ""}</span>
                 <div class="spacer"></div>
             </div>
             ${room}
