@@ -5,10 +5,10 @@ import androidx.annotation.Nullable;
 import com.example.chatauth.helpers.JSCallback;
 
 import ink.bluballz.chat.v1.ChatMessage;
-import ink.bluballz.chat.v1.ChatRoom;
+import ink.bluballz.chat.v1.GroupInfo;
 
 public interface IWebviewController {
-    void addRoom(ChatRoom room, @Nullable JSCallback<Boolean> callback);
+    void addRoom(GroupInfo room, @Nullable JSCallback<Boolean> callback);
     void removeRoom(String roomId, @Nullable JSCallback<Boolean> callback);
     void switchToRoom(String roomId, @Nullable JSCallback<Boolean> callback);
 

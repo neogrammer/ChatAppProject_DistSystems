@@ -185,6 +185,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
 
     protected override firstUpdated(_changedProperties: PropertyValues): void {
         super.firstUpdated(_changedProperties);
+        DLOG("[WebviewControllerElement] Fetching user groups from AndroidBridge...");
         AndroidBridge.showLoadingDialog();
         AsyncAndroidBridge.requestUserGroups().then((groups) => {
             groups.forEach((group) => {

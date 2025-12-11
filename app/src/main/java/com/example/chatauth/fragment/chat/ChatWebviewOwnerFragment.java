@@ -79,6 +79,7 @@ public class ChatWebviewOwnerFragment extends Fragment {
         }, controller);
         webview.addJavascriptInterface(bridge, "AndroidBridge");
         webview.loadUrl("https://appassets.androidplatform.net/assets/index.html");
+        Log.d("ChatWebviewOwnerFragment", "Using chromium version " + WebView.getCurrentWebViewPackage().versionName);
     }
 
     @Override
@@ -158,8 +159,10 @@ public class ChatWebviewOwnerFragment extends Fragment {
             });
         }
 
+        @JavascriptInterface
         public void showLoadingDialog() { handler.post(LoadingDialogFragment::show); }
 
+        @JavascriptInterface
         public void hideLoadingDialog() { handler.post(LoadingDialogFragment::hide); }
 
 
