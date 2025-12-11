@@ -53,7 +53,7 @@ namespace _3420_Chat_Service.Services
                 {
                     UserId = request.UserId,
                     UserName = request.UserName,
-                    GroupId = int.Parse(request.RoomId),
+                    GroupId = Guid.Parse(request.RoomId),
                     Content = request.Content,
                     SentAt = DateTime.UtcNow
                 };
@@ -81,8 +81,9 @@ namespace _3420_Chat_Service.Services
         {
             try
             {
+                var groupId = Guid.Parse(request.GroupId);
                 var messages = await _dbContext.Messages
-                    .Where(m => m.GroupId == request.GroupId)
+                    .Where(m => m.GroupId == groupId)
                     .OrderByDescending(m => m.SentAt)
                     .Select(m => new ChatMessage
                     {
@@ -128,10 +129,10 @@ namespace _3420_Chat_Service.Services
                 _dbContext.GroupMembers.Add(groupMember);
                 await _dbContext.SaveChangesAsync();
 
-                return new CreateGroupResponse 
-                { 
-                    Success = true, 
-                    GroupId = group.Id 
+                return new CreateGroupResponse
+                {
+                    Success = true,
+                    GroupId = group.Id.ToString()
                 };
             }
             catch (Exception ex)
@@ -146,10 +147,12 @@ namespace _3420_Chat_Service.Services
             try
             {
                 // TODO: Add user validation - check if userId exists in auth service
-                
+
+                var groupId = Guid.Parse(request.GroupId);
+
                 // Check if user is already in group
                 var existingMember = await _dbContext.GroupMembers
-                    .FirstOrDefaultAsync(gm => gm.GroupId == request.GroupId && gm.UserId == request.UserId);
+                    .FirstOrDefaultAsync(gm => gm.GroupId == groupId && gm.UserId == request.UserId);
 
                 if (existingMember != null)
                 {
@@ -158,7 +161,7 @@ namespace _3420_Chat_Service.Services
 
                 var groupMember = new GroupMember
                 {
-                    GroupId = request.GroupId,
+                    GroupId = groupId,
                     UserId = request.UserId
                 };
 
@@ -183,7 +186,7 @@ namespace _3420_Chat_Service.Services
                     .Include(gm => gm.Group)
                     .Select(gm => new GroupInfo
                     {
-                        Id = gm.Group.Id,
+                        Id = gm.Group.Id.ToString(),
                         GroupName = gm.Group.GroupName
                     })
                     .ToListAsync();

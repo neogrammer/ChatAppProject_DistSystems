@@ -12,7 +12,7 @@ namespace _3420_Chat_Service.Models
         public string UserId { get; set; } = string.Empty;
         
         [Required]
-        public int GroupId { get; set; }
+        public Guid GroupId { get; set; }
         
         [ForeignKey(nameof(GroupId))]
         public Group Group { get; set; } = null!;
