@@ -28,6 +28,8 @@ import com.example.chatauth.fragment.loading.LoadingDialogFragment;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 
+import org.json.JSONObject;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
@@ -204,21 +206,48 @@ public class ChatWebviewOwnerFragment extends Fragment {
                 Log.e(TAG, "Failed to parse message history request: " + e.getMessage());
                 return;
             }
-            //todo Make the grpc call here. pass the response to this.resolveResponse()
+            //todo Make the grpc call here. pass the response to this.resolvePromisedResponse(response, request_id) to update JS
+            // or rejectPromisedResponse on error
         }
 
         @JavascriptInterface
         public void requestUserGroups(String request_id) {
             GetUserGroupsRequest req = GetUserGroupsRequest.newBuilder().setUserId(userId).build();
-            //todo Make the grpc call here. pass the response to this.resolveResponse() to update JS
+            //todo Make the grpc call here. pass the response to this.resolvePromisedResponse(response, request_id) to update JS
+            // or rejectPromisedResponse on error
         }
 
         public boolean getLoaded() { return loaded; }
 
-        public void resolveResponse(MessageLite response, String request_id) {
+        private void resolvePromisedResponse(MessageLite response, String request_id) {
             handler.post(() -> {
-
+                fragment.withLoadedWebview(webview -> {
+                    String js = "window.Promiser.resolvePromise("
+                            + jsBase64Arg(response)
+                            + ",\""
+                            + request_id
+                            + "\")";
+                    webview.evaluateJavascript(js, null);
+                });
             });
+        }
+
+        private void rejectPromisedResponse(String error, String request_id) {
+            handler.post(() -> {
+                fragment.withLoadedWebview(webview -> {
+                    String js = "window.Promiser.rejectPromise(\""
+                            + error
+                            + "\",\""
+                            + request_id
+                            + "\")";
+                    webview.evaluateJavascript(js, null);
+                });
+            });
+        }
+
+        private static String jsBase64Arg(MessageLite proto) {
+            // Base64 is JS-safe by definition
+            return JSONObject.quote(Base64.encodeToString(proto.toByteArray(), Base64.NO_WRAP));
         }
 
         public final Handler handler = new Handler(Looper.getMainLooper());
