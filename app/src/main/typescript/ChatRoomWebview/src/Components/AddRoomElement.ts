@@ -1,7 +1,10 @@
 import { css, html, LitElement, PropertyValues } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
 import { ISearchResult, ISearchResultItem } from "../Interfaces/ISearchResult";
+import { WebviewControllerElement } from "./WebviewControllerElement";
+import { CreateGroupResponse } from "../Generated/chat";
 
+// Popover form for creating a new chat room
 @customElement("add-room")
 export class AddRoomElement extends LitElement {
     override connectedCallback(): void { 
@@ -47,7 +50,6 @@ export class AddRoomElement extends LitElement {
 
                     <!-- Scrollable user bubble list -->
                     <div class="user-list-container">
-                        <!-- Example bubbles; you’ll generate these from data -->
                         <!-- <div class="user-bubble">
                         <span class="user-name">alice</span>
                         <button class="user-remove-btn" aria-label="Remove alice">×</button>
@@ -56,7 +58,6 @@ export class AddRoomElement extends LitElement {
                         <span class="user-name">bob</span>
                         <button class="user-remove-btn" aria-label="Remove bob">×</button>
                         </div> -->
-                        <!-- ... more bubbles here ... -->
                          ${this._selected_users.map(user => html`
                             <div class="user-bubble">
                                 <span class="user-name">${user.displayName}</span>
@@ -69,7 +70,7 @@ export class AddRoomElement extends LitElement {
                     <!-- Buttons -->
                     <div class="buttons-row">
                         <button class="cancel-btn" @click="${this.onCancel}">Cancel</button>
-                        <button class="ok-btn" ?disabled=${!this.submittable}>OK</button>
+                        <button class="ok-btn" ?disabled=${!this.submittable} @click=${this.onOk}>OK</button>
                     </div>
 
                     <div id="user_search_popover" popover="manual" @toggle="${this.onSearchPopoverToggled}">
@@ -94,14 +95,59 @@ export class AddRoomElement extends LitElement {
 
     }
 
+    // Submits the form if its submittable
+    private onOk() {
+        if(!this.submittable) {
+            DLOG("[AddRoomElement] Can't submit create room request because the form isn't filled out!");
+            return;
+        }
+        const name = this._name_input.value;
+        const users = this._selected_users;
+        if(name.length === 0 || users.length === 0) {
+            DLOG("[AddRoomElement] Can't submit create room request because the form isn't filled out, though subittable was true!");
+            return;
+        }
+        AndroidBridge.showLoadingDialog();
+        let response: CreateGroupResponse;
+        AsyncAndroidBridge.createGroup(this._name_input.value).then(res => {
+            response = res;
+            if(!response.success) {
+                throw new Error("Failed to create group for unknown reason!");
+            }
+            DLOG("[AddRoomElement] Adding room " + name + " to Controller!");
+            WebviewController.addRoom({groupName: name, id: response.groupId});
+            return WebviewController.asElement<WebviewControllerElement>().updateComplete;
+        }).then(_v => {
+            // add users to group
+            DLOG("[AddRoomElement] Adding " + users.length + " users to chat room!");
+            return Promise.allSettled(users.map(v => AsyncAndroidBridge.addUserToGroup(v.id, response.groupId)));
+        }).then(added_results => {
+            let error_counter = 0;
+            for(const result of added_results) {
+                if(!result) ++error_counter;
+            }
+            if(error_counter) DLOG("[AddRoomElement] Failed to add " + error_counter + " users to chat room!");
+            else DLOG("[AddRoomElement] Added users to chat room!");
+        }).catch(err => DLOG("[AddRoomElement] Error creating room: " + err))
+        .finally(() => {
+            DLOG("[AddRoomElement] AddRoom flow complete, switching to room and hiding loading dialog!");
+            const elem = WebviewController.asElement<WebviewControllerElement>();
+            if(elem.switchToRoom(response.groupId)) elem.updateComplete.then((_v) => AndroidBridge.hideLoadingDialog());
+            else AndroidBridge.hideLoadingDialog();
+        });
+    }
+
+    // Hides the element if the user taps cancel
     private onCancel() { this.hidePopover(); }
 
-    //set submittable if names non empty and this isnt empty
+    // Set submittable if names non empty and this isnt empty
     private onNameChange(event: InputEvent) {
         const input = event.currentTarget as HTMLInputElement;
         this.submittable = input.value.length > 0 && this._selected_users.length > 0;
     }
 
+    // When the element is hidden, reset the form and ensure any updates for the current
+    // search promise doesn't apply.
     private onHostToggled = (event: ToggleEvent) => {
         if(event.newState === "closed") { 
             clearTimeout(this.onSearchChange.timeout);
@@ -117,16 +163,19 @@ export class AddRoomElement extends LitElement {
         }
     }
 
+    // Ensure search popover (the list of searched users) closes when the user taps out of it
     private onSearchPopoverToggled(event: ToggleEvent) { 
         event.newState === "open" ? this.addEventListener("click", this.onHostClickedWhileSearchPopoverOpen) : this.removeEventListener("click", this.onHostClickedWhileSearchPopoverOpen);
     }
 
+    // Event listener implementing the behavior described in onSearchPopoverToggled
     private onHostClickedWhileSearchPopoverOpen(event: MouseEvent) {
         if(!(event.composedPath().includes(this._search_popover))) {
             this._search_popover.hidePopover();
         }
     }
 
+    // Event listener that gets search results as you type (debounced by 300ms)
     private readonly onSearchChange = {
         timeout: undefined as ReturnType<typeof setTimeout> | undefined,
         result: undefined as Promise<ISearchResult> | undefined,
@@ -138,17 +187,18 @@ export class AddRoomElement extends LitElement {
             this.onSearchChange.timeout = setTimeout(() => {
                 this.setAttribute("searching", "");
                 const promise = window.AsyncAndroidBridge.searchUsers((event.currentTarget as HTMLInputElement).value);
+                this.onSearchChange.result = promise;
                 promise.then(result => {
                     if(promise !== this.onSearchChange.result) return; // outdated result
                     this._current_search_result_items = result.results;
                     this.removeAttribute("searching");
                     this._search_popover.showPopover();
                 });
-                this.onSearchChange.result = promise;
             }, 300);
         }
     }
 
+    // Adds a user to the selected list when they're checked in the search result list popover.
     private onUserSearchCheckboxChanged(user: ISearchResultItem, checked: boolean) {
         if(checked) {
             if(!this._selected_users.find(u => u.id === user.id)) {
@@ -169,6 +219,7 @@ export class AddRoomElement extends LitElement {
         }
     }
 
+    // Event listener for when a user is removed from the list
     private onRemoveSelectedUser(event: MouseEvent) { 
         const button = event.currentTarget as HTMLButtonElement;
         const userId = button.getAttribute("for-id");
@@ -218,7 +269,7 @@ export class AddRoomElement extends LitElement {
             display: flex;
             flex-direction: column;
             flex: 1 1 auto;
-            min-width: 0;              /* ⭐ REQUIRED for ellipsis in flex layouts */
+            min-width: 0;              /* REQUIRED for ellipsis in flex layouts */
         }
 
         /* First line: display name */

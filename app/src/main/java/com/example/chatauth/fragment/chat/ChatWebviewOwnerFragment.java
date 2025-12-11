@@ -33,7 +33,9 @@ import org.json.JSONObject;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
+import ink.bluballz.chat.v1.AddUserToGroupRequest;
 import ink.bluballz.chat.v1.ChatMessage;
+import ink.bluballz.chat.v1.CreateGroupRequest;
 import ink.bluballz.chat.v1.GetMessagesRequest;
 import ink.bluballz.chat.v1.GetUserGroupsRequest;
 
@@ -221,8 +223,24 @@ public class ChatWebviewOwnerFragment extends Fragment {
             // or rejectPromisedResponse on error
         }
 
+        @JavascriptInterface
         public void searchUsers(String substring, String request_id) {
             //todo make the protobuf object
+
+            //todo Make the grpc call here. pass the response to this.resolvePromisedResponse(response, request_id) to update JS
+            // or rejectPromisedResponse on error
+        }
+
+        @JavascriptInterface
+        public void createGroup(String name, String request_id) {
+            CreateGroupRequest req = CreateGroupRequest.newBuilder().setGroupName(name).setUserId(userId).build();
+
+            //todo Make the grpc call here. pass the response to this.resolvePromisedResponse(response, request_id) to update JS
+            // or rejectPromisedResponse on error
+        }
+
+        public void addUserToGroup(String userId, String groupId, String request_id) {
+            AddUserToGroupRequest req = AddUserToGroupRequest.newBuilder().setGroupId(groupId).setUserId(userId).build();
 
             //todo Make the grpc call here. pass the response to this.resolvePromisedResponse(response, request_id) to update JS
             // or rejectPromisedResponse on error

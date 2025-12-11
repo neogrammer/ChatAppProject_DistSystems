@@ -1,12 +1,19 @@
 import * as signalR from "@microsoft/signalr";
-import { ChatMessage, GetMessagesRequest, GetMessagesResponse, GetUserGroupsRequest, GetUserGroupsResponse, GroupInfo } from "./Generated/chat";
+import { ChatMessage, CreateGroupResponse, GetMessagesRequest, GetMessagesResponse, GetUserGroupsRequest, GetUserGroupsResponse, GroupInfo } from "./Generated/chat";
 
 let initialized = false;
 
+/**
+ * One-time initialization hook for the webview runtime. Sets up debugging,
+ * protobuf encoders/decoders, SignalR connection handlers, and async Android bridge helpers.
+ */
 export function ensureInitialized() {
     if(initialized) return;
     initialized = true;
     if(DEBUG) {
+        /**
+         * Builds a synthetic ChatMessage for local debug rendering.
+         */
         function makeDummyMessage(id: string, roomId: string, userId: string, content: string, userName: string): ChatMessage {
             return {
             id: id,
@@ -57,7 +64,13 @@ export function ensureInitialized() {
         window.DLOG = (val) => {}
     }
 
+    /**
+     * Protobuf decoders for Android bridge payloads.
+     */
     window["WebviewControllerDecoder"] = {
+        /**
+         * Converts a base64 string into a Uint8Array for protobuf decoding.
+         */
         toByteArray(b64: string) {
             const bin = atob(b64);
             const len = bin.length;
@@ -67,32 +80,65 @@ export function ensureInitialized() {
             }
             return bytes;
         },
+        /**
+         * Decodes a base64-encoded ChatMessage protobuf.
+         */
         decodeChatMessage(b64: string) {
             return ChatMessage.decode(this.toByteArray(b64));
         },
+        /**
+         * Decodes a base64-encoded GroupInfo protobuf.
+         */
         decodeChatRoom(b64) {
             return GroupInfo.decode(this.toByteArray(b64));
         },
+        /**
+         * Decodes a message history response and extracts messages.
+         */
         decodeChatMessageHistoryRequestResponse(b64: string) { 
             return GetMessagesResponse.decode(this.toByteArray(b64)).messages;
         },
+        /**
+         * Decodes a get-user-groups response and extracts groups.
+         */
         decodeGetUserGroupsResponse(b64) {
             return GetUserGroupsResponse.decode(this.toByteArray(b64)).groups;
         },
+        /**
+         * Placeholder decoder for search results.
+         */
         decodeSearchResult(b64: string) {
             return {results: []}; //todo
-        }
+        },
+        decodeCreateGroupResponse(b64) {
+            return CreateGroupResponse.decode(this.toByteArray(b64));
+        },
     }
+    /**
+     * Protobuf encoders for Android bridge payloads.
+     */
     window["WebviewControllerEncoder"] = { 
+        /**
+         * Encodes a ChatMessage protobuf and returns it as base64.
+         */
         encodeChatMessage(message: ChatMessage) {
             return btoa(String.fromCharCode(...ChatMessage.encode(message).finish()));
         },
+        /**
+         * Encodes a GroupInfo protobuf and returns it as base64.
+         */
         encodeGroupInfo(room: GroupInfo) {
             return btoa(String.fromCharCode(...GroupInfo.encode(room).finish()));
         },
+        /**
+         * Encodes a GetMessagesRequest protobuf and returns it as base64.
+         */
         encodeChatMessageHistoryRequest(request: GetMessagesRequest) {
             return btoa(String.fromCharCode(...GetMessagesRequest.encode(request).finish()));
         },
+        /**
+         * Encodes a GetUserGroupsRequest protobuf and returns it as base64.
+         */
         encodeGetUserGroupsRequest(request: GetUserGroupsRequest) {
             return btoa(String.fromCharCode(...GetUserGroupsRequest.encode(request).finish()));
         }
@@ -127,12 +173,21 @@ export function ensureInitialized() {
             console.error("signalr connection error:", err);
         });
 
+    /**
+     * Promise registry used to bridge Android callbacks to async/await.
+     */
     window.Promiser = {
+        /**
+         * Registers a new promise keyed by id and returns the promise.
+         */
         registerNewPromise<T>(id: string) {
             const promise_with_resolvers = Promise.withResolvers<T>();
             this.pending_promises.set(id, promise_with_resolvers as any);
                 return promise_with_resolvers.promise;
         },
+        /**
+         * Resolves a pending promise by id and cleans it up.
+         */
         resolvePromise(value, id) {
             const promise_with_resolvers = this.pending_promises.get(id);
             if(promise_with_resolvers) {
@@ -140,6 +195,9 @@ export function ensureInitialized() {
                 this.pending_promises.delete(id);
             }
         },
+        /**
+         * Rejects a pending promise by id and cleans it up.
+         */
         rejectPromise(reason, id) {
             const promise_with_resolvers = this.pending_promises.get(id);
             if(promise_with_resolvers) {
@@ -150,19 +208,31 @@ export function ensureInitialized() {
         pending_promises: new Map<string, ReturnType<typeof Promise.withResolvers<any>>>()
     } as IPromiser & {pending_promises: Map<string, ReturnType<typeof Promise.withResolvers>>};
 
+    /**
+     * Async wrappers around AndroidBridge that resolve via Promiser and decode protobuf payloads.
+     */
     window.AsyncAndroidBridge = { 
+        /**
+         * Requests message history through Java and returns decoded messages.
+         */
         async requestMessageHistory(GetMessagesRequest_b64) {
             const id = crypto.randomUUID();
             const promise = Promiser.registerNewPromise<string>(id);
             (AndroidBridge as any).requestMessageHistory(GetMessagesRequest_b64, id);
             return WebviewControllerDecoder.decodeChatMessageHistoryRequestResponse(await promise);
         },
+        /**
+         * Requests user groups through Java and returns decoded groups.
+         */
         async requestUserGroups() {
             const id = crypto.randomUUID();
             const promise = Promiser.registerNewPromise<string>(id);
             (AndroidBridge as any).requestUserGroups(id);
             return WebviewControllerDecoder.decodeGetUserGroupsResponse(await promise);
         },
+        /**
+         * Searches users via Java; short-circuits empty queries.
+         */
         async searchUsers(substring: string) {
             if(substring.length === 0) {
                 return {results: []};
@@ -171,12 +241,27 @@ export function ensureInitialized() {
             const promise = Promiser.registerNewPromise<string>(id);
             (AndroidBridge as any).searchUsers(substring, id);
             return WebviewControllerDecoder.decodeSearchResult(await promise);
-        }
+        },
+        /**
+         * Creates a group via Java; short-circuits empty queries.
+         */
+        async createGroup(name: string) {
+            if(name.length === 0) {
+                return {success: false, groupId: ""}
+            }
+            const id = crypto.randomUUID();
+            const promise = Promiser.registerNewPromise<string>(id);
+            (AndroidBridge as any).createGroup(name, id);
+            return WebviewControllerDecoder.decodeCreateGroupResponse(await promise);
+        },
     }
     
     customElements.whenDefined("webview-controller").then(() => {AndroidBridge.setLoaded()});
 }
 
+/**
+ * Provides a browser-only mock AndroidBridge for local debugging.
+ */
 function enableMockComponents() {
     window.AndroidBridge ??= {
         getUserId() {

@@ -11,6 +11,7 @@ import { ChatMessage, GroupInfo } from "../Generated/chat";
 import { ensureInitialized } from "../init";
 import { SideMenuElment } from "./SideMenuElement";
 
+// App host that implements IWebviewController
 @customElement("webview-controller")
 export class WebviewControllerElement extends LitElement implements IWebviewController {
     constructor() {
@@ -18,6 +19,11 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         window.WebviewController = this;
         ensureInitialized();
     }
+
+    /**
+     * Registers a new room and switches to it if it is the first one.
+     * Returns false for invalid metadata or duplicate ids.
+     */
     addRoom(room: GroupInfo): boolean {
         if(!room) {
             DLOG("[WebviewControllerElement] Failed to add room because argument was nullish!");
@@ -41,6 +47,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         return true;
     }
 
+    // Removes a room from the UI. If its the last room, the app shows the side menu fullscreen. If the room to remove is the current room, it switches to the next room.
     removeRoom(roomId: string): boolean {
         if(!roomId || roomId.length === 0) {
             DLOG("[WebviewControllerElement] Failed to remove room because argument was null or 0 length!");
@@ -68,6 +75,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         return return_val;
     }
 
+    // Switches to the room, and hides the side menu.
     switchToRoom(roomId: string): boolean {
         if(!roomId || roomId.length === 0) {
             DLOG("[WebviewControllerElement] Failed to switch to room because argument was null or 0 length!");
@@ -83,6 +91,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         return false;
     }
 
+    // Routes a message to the appropriate chat room.
     addMessage(message: ChatMessage): boolean {
         if(!message) {
             DLOG("[WebviewControllerElement] Failed to add message because argument was nullish!");
@@ -101,6 +110,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         return room.addMessage(message);
     }
 
+    // Routes multiple messages to the appropriate chat room
     addMessages(...messages: ChatMessage[]): boolean {
         if(!messages || messages.length === 0) {
             DLOG("[WebviewControllerElement] Failed to add messages because argument was nullish or array was empty!");
@@ -114,6 +124,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         return all_true;
     }
 
+    // Removes a message from the chat room, if it exists. Purely visual; doesn't tell the server.
     removeMessage(messageId: string, roomId: string): boolean {
         if(!messageId || messageId.length === 0) {
             DLOG(`[WebviewControllerElement] Failed to remove message because messageId argument was nullish or empty! roomId: ${roomId}`)
@@ -131,6 +142,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         return room.removeMessage(messageId);
     }
 
+    // Removes many messages from the chat room, if it exists. Purely visual; doesn't tell the server.
     removeMessages(...messageIds: [messageId: string, roomId: string][]): boolean {
         if(!messageIds || messageIds.length === 0) {
             DLOG("[WebviewControllerElement] Failed to remove messages because argument array was null or empty!");
@@ -144,6 +156,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         return all_true;
     }
 
+    // Checks to see if a message exists. If a roomId is given, then it checks that particular room, otherwise, it checks all rooms.
     hasMessage(messageId: string, roomId?: string): boolean {
         if(!messageId) {
             DLOG(`[WebviewControllerElement] Failed to check for message because messageId argument was nullish or empty! roomId: ${roomId}`)
@@ -163,6 +176,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         return false;
     }
 
+    // Gets a message from the app and a room, if given.
     getMessage(messageId: string, roomId?: string): ChatMessage | null {
         if(!messageId) {
             //todo log
@@ -194,6 +208,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         return this as unknown as T;
     }
 
+    // On initialization, fetches the user's groups.
     protected override firstUpdated(_changedProperties: PropertyValues): void {
         super.firstUpdated(_changedProperties);
         DLOG("[WebviewControllerElement] Fetching user groups from AndroidBridge...");
@@ -225,6 +240,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
 
     private _sentIds = new Set<string>();
 
+    // Sends a message from the user to the chat room
     private _onSend() {
         if(!this._input.value || this._input.value.length === 0) return;
         const message: ChatMessage = {

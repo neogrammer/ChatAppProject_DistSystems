@@ -6,12 +6,13 @@ import { ChatMessageElement } from "./ChatMessageElement";
 import { IChatMessage, IChatMessageRoomUnaware } from "../Interfaces/IChatMessage";
 import { ChatMessage } from "../Generated/chat";
 
-// dont forget to set id
+// Represents an individual chat room
 @customElement("chat-room")
 export class ChatRoomElement extends LitElement {
     name!: string;
     roomId!: string;
 
+    // Adds the given message to the chat room at the correct chronological point using a binary search
     addMessage(message: ChatMessage): boolean {
         const insert_ref = this.findInsertionElement(message.createdAt);
         const insert_element = ChatRoomElement.protoToElement(message);
@@ -20,18 +21,21 @@ export class ChatRoomElement extends LitElement {
         return true;
     }
 
+    // Removes given message from room (visual only, no server notification)
     removeMessage(id: string): boolean {
-        const elem = this.querySelector(`chat-message#${id}`);
+        const elem = this.querySelector(`chat-message#m${id}`);
         elem?.remove();
         return !!elem;
     }
 
+    // Checks to see if this room has a chat message with this id
     hasMessage(id: string): boolean {
-        return !!this.querySelector(`chat-message#${id}`);
+        return !!this.querySelector(`chat-message#m${id}`);
     }
 
+    // Gets the message with the given id
     getMessage(id: string): IChatMessageRoomUnaware | null {
-        const elem = this.querySelector(`chat-message#${id}`) as ChatMessageElement;
+        const elem = this.querySelector(`chat-message#m${id}`) as ChatMessageElement;
         if(!elem) return null;
         return elem.toIChatMessage();
     }
@@ -68,7 +72,7 @@ export class ChatRoomElement extends LitElement {
                     const idx = messages.findIndex((msg) => ("m" + msg.id) === elem.id);
                     if(idx !== -1) messages.splice(idx, 1); // remove duplicate
                 });
-                // add remaining messages (index 0 is newest)
+                // add remaining messages (index 0 is newest, so prepend through array)
                 const update_promises: Promise<boolean>[] = [];
                 for(const old_msg of messages) {
                     const elem = ChatRoomElement.protoToElement(old_msg);
@@ -113,6 +117,7 @@ export class ChatRoomElement extends LitElement {
         }
     `;
 
+    // Sets a flag that locks the scroll to the bottom when a message is added
     private readonly _onScroll = () => {
         const bottom = this.scrollHeight - this.clientHeight;
         const distance = bottom - this.scrollTop;
@@ -120,6 +125,7 @@ export class ChatRoomElement extends LitElement {
         this._should_pin_scroll = distance < 8; // wiggle margin
     };
 
+    // Ensures the scroll is at the bottom when a message is added
     private _onSlotChange() {
         requestAnimationFrame(() => {
             if(this._should_pin_scroll) this.scrollTop = this.scrollHeight;
@@ -128,6 +134,7 @@ export class ChatRoomElement extends LitElement {
 
     private _should_pin_scroll = true;
 
+    // Binary searches for a message with the given timestamp
     private findInsertionElement(insert_timestamp: number, messages = [...this.children] as ChatMessageElement[]): ChatMessageElement | null {
         let left = 0;
         let right = messages.length - 1;
@@ -148,6 +155,7 @@ export class ChatRoomElement extends LitElement {
         return result;
     }
 
+    // Helper to convert ChatMessage to ChatMessageElement
     private static protoToElement(message: ChatMessage): ChatMessageElement {
         const element = document.createElement('chat-message');
         element.id = "m" + message.id;
@@ -164,6 +172,3 @@ declare global {
     "chat-room": ChatRoomElement;
   }
 }
-
-// list of IProtobufChatMessage, transform to element
-// appendChild ChatMessageElements (leaning more towards this)
