@@ -178,18 +178,7 @@ export function ensureInitialized() {
         window.WebviewController.addRoom({id: groupId, groupName: groupName});
     });
 
-    // connect and join room
-    connection.start()
-        .then(() => {
-        DLOG("signalr connected");
-        //return connection.invoke("JoinGroup", ROOM_ID);
-        })
-        // .then(() => {
-        //   DLOG(`joined room: ${ROOM_ID}`);
-        // })
-        .catch(err => {
-            console.error("signalr connection error:", err);
-        });
+    
 
     /**
      * Promise registry used to bridge Android callbacks to async/await.
@@ -290,6 +279,16 @@ export function ensureInitialized() {
 
     (async () => {
         await customElements.whenDefined("webview-controller");
+
+        // connect
+        await connection.start()
+            .then(() => {
+                DLOG("signalr connected");
+            })
+            .catch(err => {
+                console.error("signalr connection error:", err);
+            });
+
         while(!(await WebviewController.asElement<WebviewControllerElement>().updateComplete)) {}
         AndroidBridge.setLoaded();
     })();

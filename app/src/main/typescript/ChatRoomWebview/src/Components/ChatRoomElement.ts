@@ -74,8 +74,10 @@ export class ChatRoomElement extends LitElement {
                 });
                 // add remaining messages (index 0 is newest, so prepend through array)
                 const update_promises: Promise<boolean>[] = [];
+                const user_id = AndroidBridge.getUserId();
                 for(const old_msg of messages) {
                     const elem = ChatRoomElement.protoToElement(old_msg);
+                    if(old_msg.userId === user_id) elem.classList.add("user");
                     this.prepend(elem);
                     update_promises.push(elem.updateComplete);
                 }

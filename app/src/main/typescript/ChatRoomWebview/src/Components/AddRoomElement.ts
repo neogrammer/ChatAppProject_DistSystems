@@ -77,7 +77,7 @@ export class AddRoomElement extends LitElement {
                         ${this._current_search_result_items.map((user) => html`
                                 <label class="search-result-item">
                                     <div class="search-result-text">
-                                        <div class="search-result-display-name"> ${user.displayName}</div>
+                                        <div class="search-result-display-name">${user.displayName}</div>
                                         <div class="search-result-email">${user.email}</div>
                                     </div>
                                     <input
@@ -235,7 +235,7 @@ export class AddRoomElement extends LitElement {
         }
     }
 
-    // Event listener for when a user is removed from the list
+    // Event listener for when a user is removed from the user bubbles list
     private onRemoveSelectedUser(event: MouseEvent) { 
         const button = event.currentTarget as HTMLButtonElement;
         const userId = button.getAttribute("for-id");
@@ -244,6 +244,7 @@ export class AddRoomElement extends LitElement {
             this._selected_users.splice(index, 1);
             this.requestUpdate("_selected_users");
             this.submittable = this._name_input.value.length > 0 && this._selected_users.length > 0;
+            //todo uncheck corresponding checkbox, if it exists
             DLOG(`[AddRoomElement] Removed user with id '${userId}' from selected users.`);
         }
         else DLOG(`[AddRoomElement] Could not find user with id '${userId}' to remove from selected users.`);
