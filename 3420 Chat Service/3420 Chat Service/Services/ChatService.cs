@@ -225,9 +225,10 @@ namespace _3420_Chat_Service.Services
                 }
 
                 var query = request.Query.Trim().ToLower();
+                var requestingUserId = long.TryParse(request.UserId, out var parsedId) ? parsedId : 0;
 
                 var users = await _authDbContext.Users
-                    .Where(u => u.Email.ToLower().Contains(query) || u.DisplayName.ToLower().Contains(query))
+                    .Where(u => (u.Email.ToLower().Contains(query) || u.DisplayName.ToLower().Contains(query)) && u.Id != requestingUserId)
                     .Select(u => new UserInfo
                     {
                         UserId = u.Id.ToString(),

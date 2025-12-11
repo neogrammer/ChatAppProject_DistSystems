@@ -63,6 +63,7 @@ message GetUserGroupsResponse {
 
 message SearchUsersRequest {
   string query = 1;
+  string userId = 2;
 }
 
 message UserInfo {
