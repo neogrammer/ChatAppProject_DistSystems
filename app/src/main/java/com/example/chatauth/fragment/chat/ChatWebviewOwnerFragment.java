@@ -291,15 +291,8 @@ public class ChatWebviewOwnerFragment extends Fragment {
                 return;
             }
 
-            // get access token
-            String accessToken;
-            try {
-                var viewModel = ((MainActivity)fragment.requireActivity()).getViewModel();
-                accessToken = viewModel.tokenStore.access();
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to get access token: " + e.getMessage());
-                return;
-            }
+            String accessToken = getAccessToken();
+            if(accessToken.isEmpty()) return; //todo error dialog
 
             // send message via grpc
             chatClient.sendMessage(msg, accessToken, (response, error) -> {
@@ -336,8 +329,19 @@ public class ChatWebviewOwnerFragment extends Fragment {
                 Log.e(TAG, "Failed to parse message history request: " + e.getMessage());
                 return;
             }
-            //todo Make the grpc call here. pass the response to this.resolvePromisedResponse(response, request_id) to update JS
-            // or rejectPromisedResponse on error
+
+            String accessToken = getAccessToken();
+            if(accessToken.isEmpty()) return; //todo error dialog
+
+            chatClient.getMessagesForGroup(req, accessToken, (response, error) -> {
+                if(error != null) {
+                    rejectPromisedResponse(error.getMessage(), request_id);
+                } else if(response != null) {
+                    resolvePromisedResponse(response, request_id);
+                }
+                else rejectPromisedResponse("Null response received for requestMessageHistory!", request_id);
+            });
+
         }
 
         /**
@@ -354,8 +358,18 @@ public class ChatWebviewOwnerFragment extends Fragment {
         @JavascriptInterface
         public void requestUserGroups(String request_id) {
             GetUserGroupsRequest req = GetUserGroupsRequest.newBuilder().setUserId(userId).build();
-            //todo Make the grpc call here. pass the response to this.resolvePromisedResponse(response, request_id) to update JS
-            // or rejectPromisedResponse on error
+
+            String accessToken = getAccessToken();
+            if(accessToken.isEmpty()) return; //todo error dialog
+
+            chatClient.getUserGroups(req, accessToken, (response, error) -> {
+                if(error != null) {
+                    rejectPromisedResponse(error.getMessage(), request_id);
+                } else if(response != null) {
+                    resolvePromisedResponse(response, request_id);
+                }
+                else rejectPromisedResponse("Null response received for requestUserGroups!", request_id);
+            });
         }
 
         /**
@@ -375,8 +389,17 @@ public class ChatWebviewOwnerFragment extends Fragment {
         public void searchUsers(String substring, String request_id) {
             SearchUsersRequest req = SearchUsersRequest.newBuilder().setQuery(substring).build();
 
-            //todo Make the grpc call here. pass the response to this.resolvePromisedResponse(response, request_id) to update JS
-            // or rejectPromisedResponse on error
+            String accessToken = getAccessToken();
+            if(accessToken.isEmpty()) return; //todo error dialog
+
+            chatClient.searchUsers(req, accessToken, (response, error) -> {
+                if(error != null) {
+                    rejectPromisedResponse(error.getMessage(), request_id);
+                } else if(response != null) {
+                    resolvePromisedResponse(response, request_id);
+                }
+                else rejectPromisedResponse("Null response received for searchUsers!", request_id);
+            });
         }
 
         /**
@@ -394,8 +417,17 @@ public class ChatWebviewOwnerFragment extends Fragment {
         public void createGroup(String name, String request_id) {
             CreateGroupRequest req = CreateGroupRequest.newBuilder().setGroupName(name).setUserId(userId).build();
 
-            //todo Make the grpc call here. pass the response to this.resolvePromisedResponse(response, request_id) to update JS
-            // or rejectPromisedResponse on error
+            String accessToken = getAccessToken();
+            if(accessToken.isEmpty()) return; //todo error dialog
+
+            chatClient.createGroup(req, accessToken, (response, error) -> {
+                if(error != null) {
+                    rejectPromisedResponse(error.getMessage(), request_id);
+                } else if(response != null) {
+                    resolvePromisedResponse(response, request_id);
+                }
+                else rejectPromisedResponse("Null response received for createGroup!", request_id);
+            });
         }
 
         /**
@@ -413,8 +445,17 @@ public class ChatWebviewOwnerFragment extends Fragment {
         public void addUserToGroup(String userId, String groupId, String request_id) {
             AddUserToGroupRequest req = AddUserToGroupRequest.newBuilder().setGroupId(groupId).setUserId(userId).build();
 
-            //todo Make the grpc call here. pass the response to this.resolvePromisedResponse(response, request_id) to update JS
-            // or rejectPromisedResponse on error
+            String accessToken = getAccessToken();
+            if(accessToken.isEmpty()) return; //todo error dialog
+
+            chatClient.addUserToGroup(req, accessToken, (response, error) -> {
+                if(error != null) {
+                    rejectPromisedResponse(error.getMessage(), request_id);
+                } else if(response != null) {
+                    resolvePromisedResponse(response, request_id);
+                }
+                else rejectPromisedResponse("Null response received for addUserToGroup!", request_id);
+            });
         }
 
         /**
@@ -472,6 +513,18 @@ public class ChatWebviewOwnerFragment extends Fragment {
                     webview.evaluateJavascript(js, null);
                 });
             });
+        }
+
+        private String getAccessToken() {
+            String accessToken;
+            try {
+                var viewModel = ((MainActivity)fragment.requireActivity()).getViewModel();
+                accessToken = viewModel.tokenStore.access();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to get access token: " + e.getMessage());
+                return "";
+            }
+            return accessToken;
         }
 
         /**
