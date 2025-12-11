@@ -1,5 +1,5 @@
 import * as signalR from "@microsoft/signalr";
-import { AddUserToGroupResponse, ChatMessage, CreateGroupResponse, GetMessagesRequest, GetMessagesResponse, GetUserGroupsRequest, GetUserGroupsResponse, GroupInfo } from "./Generated/chat";
+import { AddUserToGroupResponse, ChatMessage, CreateGroupResponse, GetMessagesRequest, GetMessagesResponse, GetUserGroupsRequest, GetUserGroupsResponse, GroupInfo, SearchUsersResponse } from "./Generated/chat";
 
 let initialized = false;
 
@@ -105,14 +105,20 @@ export function ensureInitialized() {
             return GetUserGroupsResponse.decode(this.toByteArray(b64)).groups;
         },
         /**
-         * Placeholder decoder for search results.
+         * Decoder for search results.
          */
         decodeSearchResult(b64: string) {
-            return {users: []}; //todo
+            return SearchUsersResponse.decode(this.toByteArray(b64))
         },
+        /**
+         * Decoder for create group response
+         */
         decodeCreateGroupResponse(b64) {
             return CreateGroupResponse.decode(this.toByteArray(b64));
         },
+        /**
+         * Decoder for add user to group response
+         */
         decodeAddUserToGroupResponse(b64) {
             return AddUserToGroupResponse.decode(this.toByteArray(b64)).success;
         },
