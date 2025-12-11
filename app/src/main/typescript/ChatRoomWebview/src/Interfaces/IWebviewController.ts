@@ -1,13 +1,11 @@
 import { ChatMessage, GetMessagesRequest, GetUserGroupsRequest, GroupInfo } from "../Generated/chat";
-import { IChatMessage } from "./IChatMessage";
-import { IChatRoom } from "./IChatRoom";
 import type { IElementConvertable } from "./IElementConvertable";
 
 export type Base64String = string;
 
 // Represents the interface between the wider app and the chat webview
 export interface IWebviewController extends IElementConvertable {
-    addRoom(room: IChatRoom): boolean;
+    addRoom(room: GroupInfo): boolean;
     removeRoom(roomId: string): boolean;
     switchToRoom(roomId: string): boolean;
 
@@ -20,16 +18,16 @@ export interface IWebviewController extends IElementConvertable {
 }
 
 export interface IWebviewControllerDecoder {
-    decodeChatRoom(b64: string): GroupInfo;
-    decodeChatMessage(b64: string): ChatMessage;
-    decodeChatMessageHistoryRequestResponse(b64: string): ChatMessage[];
-    decodeGetUserGroupsResponse(b64: string): GroupInfo[];
-    toByteArray(b64: string): Uint8Array;
+    decodeChatRoom(b64: Base64String): GroupInfo;
+    decodeChatMessage(b64: Base64String): ChatMessage;
+    decodeChatMessageHistoryRequestResponse(b64: Base64String): ChatMessage[];
+    decodeGetUserGroupsResponse(b64: Base64String): GroupInfo[];
+    toByteArray(b64: Base64String): Uint8Array;
 }
 
 export interface IWebviewControllerEncoder { 
-    encodeGroupInfo(room: GroupInfo): string;
-    encodeChatMessage(message: ChatMessage): string;
-    encodeChatMessageHistoryRequest(request: GetMessagesRequest): string;
-    encodeGetUserGroupsRequest(request: GetUserGroupsRequest): string;
+    encodeGroupInfo(room: GroupInfo): Base64String;
+    encodeChatMessage(message: ChatMessage): Base64String;
+    encodeChatMessageHistoryRequest(request: GetMessagesRequest): Base64String;
+    encodeGetUserGroupsRequest(request: GetUserGroupsRequest): Base64String;
 }

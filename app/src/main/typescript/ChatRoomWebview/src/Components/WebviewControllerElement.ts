@@ -4,13 +4,10 @@ import "./SideMenuElement"
 import "../init"
 import { css, html, LitElement, PropertyValues } from "lit";
 import { IWebviewController } from "../Interfaces/IWebviewController";
-import { IChatMessage } from "../Interfaces/IChatMessage";
-import { IChatRoom } from "../Interfaces/IChatRoom";
 import { ChatRoomElement } from "./ChatRoomElement";
 import { customElement, query, state } from "lit/decorators.js";
 import { map } from "lit/directives/map.js";
-import { ChatMessage } from "../Generated/chat";
-import { randomUUID } from "crypto";
+import { ChatMessage, GroupInfo } from "../Generated/chat";
 import { ensureInitialized } from "../init";
 import { SideMenuElment } from "./SideMenuElement";
 
@@ -21,7 +18,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         window.WebviewController = this;
         ensureInitialized();
     }
-    addRoom(room: IChatRoom): boolean {
+    addRoom(room: GroupInfo): boolean {
         if(!room) {
             DLOG("[WebviewControllerElement] Failed to add room because argument was nullish!");
             return false;
@@ -30,17 +27,17 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
             DLOG("[WebviewControllerElement] Failed to add room because argument id was null or 0 length!");
             return false;
         }
-        if(!room.roomName || room.roomName.length === 0) {
+        if(!room.groupName || room.groupName.length === 0) {
             DLOG("[WebviewControllerElement] Failed to add room because argument roomName was null or 0 length!");
             return false;
         }
         if(this._rooms.has(room.id)) return false;
         const room_element = document.createElement('chat-room');
-        room_element.name = room.roomName;
+        room_element.name = room.groupName;
         room_element.roomId = room.id;
         this._rooms.set(room.id, room_element);
         this.requestUpdate("_rooms");
-        if(this._rooms.size === 1) this.switchToRoom(room.id);
+        if(this._rooms.size === 1) this.switchToRoom(room.id); //todo maybe move to end of firstUpdated
         return true;
     }
 
@@ -199,10 +196,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         AsyncAndroidBridge.requestUserGroups().then((groups) => {
             DLOG(`[WebviewControllerElement] Received ${groups.length} user groups from AndroidBridge.`);
             groups.forEach((group) => {
-                this.addRoom({
-                    id: group.id,
-                    roomName: group.groupName
-                });
+                this.addRoom(group);
             });
         }).catch((err) => {
             DLOG("[WebviewControllerElement] Failed to fetch user groups from AndroidBridge: " + err);

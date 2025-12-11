@@ -1,5 +1,6 @@
 import { css, html, LitElement, PropertyValues } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
+import { ISearchResultItem } from "../Interfaces/ISearchResult";
 
 @customElement("add-room")
 export class AddRoomElement extends LitElement {
@@ -70,6 +71,13 @@ export class AddRoomElement extends LitElement {
                         <button class="user-remove-btn" aria-label="Remove bob">×</button>
                         </div> -->
                         <!-- ... more bubbles here ... -->
+                         ${this._selected_users.map(user => html`
+                            <div class="user-bubble">
+                                <span class="user-name">${user.displayName}</span>
+                                <button class="user-remove-btn" for-id=${user.id} @click="${this.onRemoveSelectedUser}">X</button>
+                            </div>
+                         `)}
+
                     </div>
 
                     <!-- Buttons -->
@@ -88,21 +96,29 @@ export class AddRoomElement extends LitElement {
     }
 
     private onCancel() { this.hidePopover(); }
-    //todo set submittable if names non empty and this isnt empty
-    private onNameInput(event: InputEvent) {}
+
+    //set submittable if names non empty and this isnt empty
+    private onNameInput(event: InputEvent) {
+        const input = event.currentTarget as HTMLInputElement;
+        this.submittable = input.value.length > 0 && this._selected_users.length > 0;
+    }
+
     private onHostToggled = (event: ToggleEvent) => {
         if(event.newState === "closed") { 
             //todo reset form
         }
     }
+
     private onSearchPopoverToggled(event: ToggleEvent) { 
         event.newState === "open" ? this.addEventListener("click", this.onHostClickedWhileSearchPopoverOpen) : this.removeEventListener("click", this.onHostClickedWhileSearchPopoverOpen);
     }
+
     private onHostClickedWhileSearchPopoverOpen(event: MouseEvent) {
         if(!(event.composedPath().includes(this._search_popover))) {
             this._search_popover.hidePopover();
         }
     }
+
     private readonly onSearchInput = {
         timeout: undefined as ReturnType<typeof setTimeout> | undefined,
         handleEvent: (event: InputEvent) => {
@@ -113,8 +129,21 @@ export class AddRoomElement extends LitElement {
         }
     }
 
-    @query("#user_search_popover", true)
-    private _search_result_container!: HTMLDivElement;
+    private onRemoveSelectedUser(event: MouseEvent) { 
+        const button = event.currentTarget as HTMLButtonElement;
+        const userId = button.getAttribute("for-id");
+        const index = this._selected_users.findIndex(user => user.id === userId);
+        if(index !== -1) {
+            this._selected_users.splice(index, 1);
+            this.requestUpdate("_selected_users");
+            this.submittable = this._name_input.value.length > 0 && this._selected_users.length > 0;
+            DLOG(`[AddRoomElement] Removed user with id '${userId}' from selected users.`);
+        }
+        else DLOG(`[AddRoomElement] Could not find user with id '${userId}' to remove from selected users.`);
+    }
+
+    @query("#room_name_input", true)
+    private _name_input!: HTMLInputElement;
 
     @query("#user_search_input", true)
     private _search_input!: HTMLInputElement;
@@ -124,6 +153,12 @@ export class AddRoomElement extends LitElement {
 
     @state()
     private submittable = false;
+
+    @state()
+    private _selected_users: ISearchResultItem[] = [];
+
+    @state()
+    private _current_search_result_items: ISearchResultItem[] = [];
 
     static styles = css`
         .add-room-container {

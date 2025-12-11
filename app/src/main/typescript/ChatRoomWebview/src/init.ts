@@ -121,7 +121,7 @@ export function ensureInitialized() {
         //   DLOG(`joined room: ${ROOM_ID}`);
         // })
         .catch(err => {
-        console.error("signalr connection error:", err);
+            console.error("signalr connection error:", err);
         });
 
     window.Promiser = {
