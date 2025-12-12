@@ -259,10 +259,8 @@ export function ensureInitialized() {
         },
     };
 
-    //todo use Promise.allSettled where possible
-    (async () => {
-        await customElements.whenDefined("webview-controller");
 
+    (async () => {
         // connect
         await connection.start()
             .then(() => {
@@ -270,9 +268,16 @@ export function ensureInitialized() {
             })
             .catch(err => {
                 console.error("signalr connection error:", err);
+                AndroidBridge.showErrorDialog("Failed to connect to message service", "The app couldn't connect to the message service, are you connected to the server?", false);
             });
+        
+        // wait for script to finish
+        await customElements.whenDefined("webview-controller");
 
+        // wait for all updates to finish
         while(!(await WebviewController.asElement<WebviewControllerElement>().updateComplete)) {}
+
+        // let app make async requests
         AndroidBridge.setLoaded();
     })();
 }

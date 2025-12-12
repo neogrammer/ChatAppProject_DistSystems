@@ -268,7 +268,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
     }
 
     protected override render() {
-        const room = this._rooms.get(this.current_room); //todo use when()
+        const room = this._rooms.get(this.current_room);
 
         return html`
             <div id="room_header" class="header">

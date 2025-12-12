@@ -88,6 +88,24 @@ public class ChatWebviewFragment extends Fragment /*implements IWebviewControlle
         });
     }
 
+    /**
+     * Checks if the installed Android System WebView version meets the minimum requirement.
+     * <p>
+     * This method retrieves the current WebView package information and parses its
+     * version string to extract the major version number. It then compares this
+     * number against a minimum required version (currently 125).
+     * <p>
+     * If the WebView package cannot be determined, the version string is malformed,
+     * or the major version is below the required minimum, an {@link ErrorDialogFragment}
+     * is displayed to the user, instructing them to update their WebView component.
+     * In these failure cases, the method returns {@code false}.
+     * <p>
+     * If the version check is successful, the method logs the current WebView version
+     * and returns {@code true}, allowing the application to proceed with loading
+     * the WebView content.
+     *
+     * @return {@code true} if the WebView version is at least 125, {@code false} otherwise.
+     */
     private boolean versionCheckWebview() {
         final var pack = WebView.getCurrentWebViewPackage();
         if(pack == null) {
