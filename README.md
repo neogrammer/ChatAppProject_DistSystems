@@ -2,7 +2,7 @@
 Contributers: Justin Hardee, Tyler Wray, Charles Stokes
 ## Components
 ### Android Client
-The android client lives in the root project directory. To build, load the project into Android Studio and build that way
+The android client lives in the root project directory. To build, load the project into Android Studio and build that way (note that it may take a few minutes and may appear to hang while running the npm scripts). Initially, the user has no chat rooms and is just shown their empty room list. To create a new chat room, tap the plus sign at the top right and go from there. Creating a room requires multiple users, so make sure to have launched the app and registered a few accounts, then search them by display name. Added users are forcefully added to created chat rooms.
 ### Chat Service
 The Chat Service can be found in the "3420 Chat Service" directory. To build, use "docker compose up --build" in the project root directory (Docker Desktop must be running). This will also start the Auth Service, so there's no need to start it individually. The client connects to the Chat Service through the android emulator local host IP so the device must be running on your local machine to function. In a real deployment, the IP address would simply be changed to the endpoint where the services are hosted at. It supports horizontal scaling through use of a redis backplane.
 ### Auth Service
