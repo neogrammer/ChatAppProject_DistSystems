@@ -11,56 +11,11 @@ let initialized = false;
 export function ensureInitialized() {
     if(initialized) return;
     initialized = true;
+
+    // if statement for tree shaking
     if(DEBUG) {
-        /**
-         * Builds a synthetic ChatMessage for local debug rendering.
-         */
-        function makeDummyMessage(id: string, roomId: string, userId: string, content: string, userName: string): ChatMessage {
-            return {
-            id: id,
-            content: content,
-            createdAt: Date.now(),
-            roomId: roomId,
-            userId: userId,
-            userName: userName
-            }
-        }
-
-  // window.AndroidBridge ??= {
-  //   getUserId() {
-  //     return "0"
-  //   },
-  //   getUserName() {
-  //     return "Tyler"
-  //   },
-  //   postMessage(b64) {
-      
-  //   },
-  //   setLoaded() {
-      
-  //   },
-  //   requestMessageHistory(ChatMessageHistoryRequest_b64) {
-      
-  //   },
-  //   showLoadingDialog() {},
-  //   hideLoadingDialog() {}
-  // }
-
-  // const controller = document.querySelector('webview-controller');
-  // controller!.addRoom({id: "main", roomName: "Anonymous"});
-  // controller!.addRoom({id: "second", roomName: "Second Room"});
-  // //controller!.switchToRoom("0");
-  // controller!.addMessage(makeDummyMessage("0", "main", "0", "Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message ", "Tyler"));
-  // setTimeout(() => {
-  //   controller!.addMessage(makeDummyMessage("1", "main", "2", "Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message ", "User"));
-  //   controller!.addMessage(makeDummyMessage("2", "main", "0", "Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message ", "Tyler"));
-  //   controller!.addMessage(makeDummyMessage("3", "main", "0", "Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message Test message ", "Tyler"));
-
-  // }, 1000);
-  
         window.DLOG = (val) => console.debug(val);
     }
-
     else {
         window.DLOG = (val) => {}
     }
@@ -155,7 +110,6 @@ export function ensureInitialized() {
     }
 
     const CHAT_SERVICE_URL = "http://10.0.2.2:5066";
-    //const ROOM_ID = "main";
 
     // setup signalr connection
     const userId = window.AndroidBridge.getUserId();
@@ -177,8 +131,6 @@ export function ensureInitialized() {
         DLOG(`Group: ${groupName} (${groupId})`);
         window.WebviewController.addRoom({id: groupId, groupName: groupName});
     });
-
-    
 
     /**
      * Promise registry used to bridge Android callbacks to async/await.
@@ -272,11 +224,8 @@ export function ensureInitialized() {
             return WebviewControllerDecoder.decodeAddUserToGroupResponse(await promise);
         },
     };
-    
-    // customElements.whenDefined("webview-controller")
-    //     .then(() => WebviewController.asElement<WebviewControllerElement>().updateComplete)
-    //     .then(complete => );
 
+    //todo use Promise.allSettled where possible
     (async () => {
         await customElements.whenDefined("webview-controller");
 
@@ -292,33 +241,4 @@ export function ensureInitialized() {
         while(!(await WebviewController.asElement<WebviewControllerElement>().updateComplete)) {}
         AndroidBridge.setLoaded();
     })();
-}
-
-/**
- * Provides a browser-only mock AndroidBridge for local debugging.
- */
-function enableMockComponents() {
-    window.AndroidBridge ??= {
-        getUserId() {
-            return "0"
-        },
-        getUserName() {
-            return "Tyler"
-        },
-        postMessage(ChatMessage_b64: string) {
-            WebviewController.addMessage(WebviewControllerDecoder.decodeChatMessage(ChatMessage_b64));
-        },
-        setLoaded() {
-            DLOG("setLoaded called");
-        },
-        showLoadingDialog() {
-            DLOG("showLoadingDialog called");
-        },
-        hideLoadingDialog() {
-            DLOG("hideLoadingDialog called");
-        },
-        requestMessageHistory(GetMessagesRequest_b64: string, id: string) {},
-        requestUserGroups(id: string) {},
-        searchUsers(substring: string, id: string) {}
-    } as any;
 }

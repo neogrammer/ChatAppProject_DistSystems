@@ -75,7 +75,7 @@ export class AddRoomElement extends LitElement {
 
                     <div id="user_search_popover" popover="manual" @toggle="${this.onSearchPopoverToggled}">
                         ${this._current_search_result_items.map((user) => html`
-                                <label class="search-result-item">
+                                <label class="search-result-item" for-id="${user.userId}">
                                     <div class="search-result-text">
                                         <div class="search-result-display-name">${user.displayName}</div>
                                         <div class="search-result-email">${user.email}</div>
@@ -84,6 +84,7 @@ export class AddRoomElement extends LitElement {
                                         type="checkbox"
                                         class="search-result-checkbox"
                                         @change=${(e: Event) => this.onUserSearchCheckboxChanged(user, (e.currentTarget as HTMLInputElement).checked)}
+                                        ?checked=${this._selected_users.find(v => v.userId === user.userId) !== undefined}
                                     />
                                 </label>
                             `
@@ -203,9 +204,8 @@ export class AddRoomElement extends LitElement {
                 this.onSearchInput.result = promise;
                 promise.then(result => {
                     if(promise !== this.onSearchInput.result) return; // outdated result
-                    const user_id = AndroidBridge.getUserId();
-                    const this_user_idx = result.users.findIndex(v => v.userId === user_id); //todo remove when server side fix is enable
-                    if(this_user_idx !== -1) result.users.splice(this_user_idx, 1); // todo remove when server side fix is enabled
+                    
+                    
                     this._current_search_result_items = result.users;
                     this.removeAttribute("searching");
                     this._search_popover.showPopover();
@@ -242,9 +242,13 @@ export class AddRoomElement extends LitElement {
         const index = this._selected_users.findIndex(user => user.userId === userId);
         if(index !== -1) {
             this._selected_users.splice(index, 1);
-            this.requestUpdate("_selected_users");
+            
             this.submittable = this._name_input.value.length > 0 && this._selected_users.length > 0;
+            
+            this.requestUpdate("_selected_users");
             //todo uncheck corresponding checkbox, if it exists
+            const checkbox = this._search_popover.querySelector(`.search-result-item[for-id="${userId}"]`)?.querySelector("input");
+            if(checkbox) checkbox.checked = false;
             DLOG(`[AddRoomElement] Removed user with id '${userId}' from selected users.`);
         }
         else DLOG(`[AddRoomElement] Could not find user with id '${userId}' to remove from selected users.`);
