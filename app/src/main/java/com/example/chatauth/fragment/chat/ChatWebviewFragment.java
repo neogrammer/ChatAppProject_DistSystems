@@ -2,6 +2,7 @@ package com.example.chatauth.fragment.chat;
 
 import android.os.Bundle;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -58,6 +59,10 @@ public class ChatWebviewFragment extends Fragment /*implements IWebviewControlle
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() { }
+        });
         var frag_manager = requireActivity().getSupportFragmentManager();
         webview_owner = (ChatWebviewOwnerFragment) frag_manager.findFragmentByTag(ChatWebviewOwnerFragment.TAG);
         if(webview_owner == null) { throw new RuntimeException("Webview owner fragment not found!"); }
