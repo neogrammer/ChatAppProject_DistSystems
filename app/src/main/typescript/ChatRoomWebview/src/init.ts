@@ -1,6 +1,7 @@
 import * as signalR from "@microsoft/signalr";
 import { AddUserToGroupResponse, ChatMessage, CreateGroupResponse, GetMessagesRequest, GetMessagesResponse, GetUserGroupsRequest, GetUserGroupsResponse, GroupInfo, SearchUsersResponse } from "./Generated/chat";
 import { WebviewControllerElement } from "./Components/WebviewControllerElement";
+import { IPromiser } from "./Interfaces/IWebviewController";
 
 let initialized = false;
 
@@ -177,8 +178,14 @@ export function ensureInitialized() {
         async requestMessageHistory(GetMessagesRequest_b64) {
             const id = crypto.randomUUID();
             const promise = Promiser.registerNewPromise<string>(id);
-            (AndroidBridge as any).requestMessageHistory(GetMessagesRequest_b64, id);
-            return WebviewControllerDecoder.decodeChatMessageHistoryRequestResponse(await promise);
+            try {
+                (AndroidBridge as any).requestMessageHistory(GetMessagesRequest_b64, id);
+                return WebviewControllerDecoder.decodeChatMessageHistoryRequestResponse(await promise);
+            } catch(ex) {
+                DLOG("[AsyncAndroidBridge] Failed to get message history: " + ex);
+                AndroidBridge.showErrorDialog("Failed to get message history", "Failed to get message history for the current room!", true);
+                return [];
+            }
         },
         /**
          * Requests user groups through Java and returns decoded groups.
@@ -186,8 +193,14 @@ export function ensureInitialized() {
         async requestUserGroups() {
             const id = crypto.randomUUID();
             const promise = Promiser.registerNewPromise<string>(id);
-            (AndroidBridge as any).requestUserGroups(id);
-            return WebviewControllerDecoder.decodeGetUserGroupsResponse(await promise);
+            try {
+                (AndroidBridge as any).requestUserGroups(id);
+                return WebviewControllerDecoder.decodeGetUserGroupsResponse(await promise);
+            } catch(ex) {
+                DLOG("[AsyncAndroidBridge] Failed to get user groups: " + ex);
+                AndroidBridge.showErrorDialog("Failed to get your chat rooms", "The app couldn't get your chat rooms, are you connected and are the servers up?", false);
+                return [];
+            }
         },
         /**
          * Searches users via Java; short-circuits empty queries.
@@ -198,8 +211,14 @@ export function ensureInitialized() {
             }
             const id = crypto.randomUUID();
             const promise = Promiser.registerNewPromise<string>(id);
-            (AndroidBridge as any).searchUsers(substring, id);
-            return WebviewControllerDecoder.decodeSearchResult(await promise);
+            try {
+                (AndroidBridge as any).searchUsers(substring, id);
+                return WebviewControllerDecoder.decodeSearchResult(await promise);
+            } catch(ex) {
+                DLOG(`[AsyncAndroidBridge] Failed to search users (substring = ${substring}): ${ex}`);
+                AndroidBridge.showErrorDialog("Failed to search for users", "The app couldn't execute the search, are you connected and are the servers up?", true);
+                return {users: []};
+            }
         },
         /**
          * Creates a group via Java; short-circuits empty queries.
@@ -210,18 +229,33 @@ export function ensureInitialized() {
             }
             const id = crypto.randomUUID();
             const promise = Promiser.registerNewPromise<string>(id);
-            (AndroidBridge as any).createGroup(name, id);
-            return WebviewControllerDecoder.decodeCreateGroupResponse(await promise);
+            try {
+                (AndroidBridge as any).createGroup(name, id);
+                return WebviewControllerDecoder.decodeCreateGroupResponse(await promise);
+            } catch(ex) {
+                DLOG(`[AsyncAndroidBridge] Failed to create group with (name = ${name}): ${ex}`);
+                AndroidBridge.showErrorDialog("Failed to add chat room", "The app couldn't add the chat room, are you connected and are the servers up?", true);
+                return {groupId: "", success: false};
+            }
+            
         },
 
+        /**
+         * Adds users to a group via Java
+         */
         async addUserToGroup(userId, groupId) {
             if(userId.length === 0 || groupId.length === 0) {
                 return false;
             }
             const id = crypto.randomUUID();
             const promise = Promiser.registerNewPromise<string>(id);
-            (AndroidBridge as any).addUserToGroup(userId, groupId, id);
-            return WebviewControllerDecoder.decodeAddUserToGroupResponse(await promise);
+            try {
+                (AndroidBridge as any).addUserToGroup(userId, groupId, id);
+                return WebviewControllerDecoder.decodeAddUserToGroupResponse(await promise);
+            } catch(ex) {
+                DLOG(`[AsyncAndroidBridge] Failed to add user to group with userId = ${userId} and group = ${groupId}: ${ex}`);
+                return false;
+            }
         },
     };
 

@@ -128,7 +128,10 @@ export class AddRoomElement extends LitElement {
             for(const result of added_results) {
                 if(!result) ++error_counter;
             }
-            if(error_counter) DLOG("[AddRoomElement] Failed to add " + error_counter + " users to chat room!");
+            if(error_counter) {
+                DLOG("[AddRoomElement] Failed to add " + error_counter + " users to chat room!");
+                AndroidBridge.showErrorDialog("Some users couldn't be added", `${error_counter} users could not be added to the new chat room.`, true);
+            }
             else DLOG("[AddRoomElement] Added users to chat room!");
         }).catch(err => DLOG("[AddRoomElement] Error creating room: " + err))
         .finally(() => {
