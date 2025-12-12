@@ -50,14 +50,6 @@ export class AddRoomElement extends LitElement {
 
                     <!-- Scrollable user bubble list -->
                     <div class="user-list-container">
-                        <!-- <div class="user-bubble">
-                        <span class="user-name">alice</span>
-                        <button class="user-remove-btn" aria-label="Remove alice">×</button>
-                        </div>
-                        <div class="user-bubble">
-                        <span class="user-name">bob</span>
-                        <button class="user-remove-btn" aria-label="Remove bob">×</button>
-                        </div> -->
                          ${this._selected_users.map(user => html`
                             <div class="user-bubble">
                                 <span class="user-name">${user.displayName}</span>
@@ -439,6 +431,7 @@ export class AddRoomElement extends LitElement {
             border: 1px solid #ccc;
             border-radius: 4px;
             padding: 4px;
+            max-height: 30vh;
         }
 
         /* Scrollable bubble list */

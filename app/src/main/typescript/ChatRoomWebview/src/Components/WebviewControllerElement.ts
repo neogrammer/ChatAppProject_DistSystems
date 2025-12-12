@@ -262,6 +262,7 @@ export class WebviewControllerElement extends LitElement implements IWebviewCont
         if(!room!.addMessage(message)) return;
         this._sentIds.add(message.id);
         const encoded = ChatMessage.encode(message).finish();
+        this._input.value = "";
         window.AndroidBridge.postMessage(btoa(String.fromCharCode(...encoded)));
         DLOG(`[WebviewControllerElement] Sent message ${message.content}`);
     }
