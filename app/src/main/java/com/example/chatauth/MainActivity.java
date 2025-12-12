@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.chatauth.auth.AuthClientSample;
 import com.example.chatauth.auth.TokenStore;
+import com.example.chatauth.fragment.error.ErrorDialogFragment;
 import com.example.chatauth.fragment.loading.LoadingDialogFragment;
 import com.example.chatauth.fragment.chat.ChatWebviewOwnerFragment;
 
@@ -32,8 +33,9 @@ public class MainActivity extends AppCompatActivity {
         MainActivity.activity_singleton = new WeakReference<>(this);
         current_data = new ViewModelProvider(this).get(MainActivityViewmodel.class);
 
-        // init loading dialog
+        // init loading/error dialog
         LoadingDialogFragment.assignActivityHost(this);
+        ErrorDialogFragment.assignActivityHost(this);
 
         setContentView(R.layout.activity_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.nav_main), (v, insets) -> {

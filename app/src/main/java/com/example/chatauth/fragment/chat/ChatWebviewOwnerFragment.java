@@ -24,6 +24,7 @@ import androidx.webkit.WebViewAssetLoader;
 
 import com.example.chatauth.MainActivity;
 import com.example.chatauth.chat.ChatClient;
+import com.example.chatauth.fragment.error.ErrorDialogFragment;
 import com.example.chatauth.fragment.loading.LoadingDialogFragment;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
@@ -268,6 +269,18 @@ public class ChatWebviewOwnerFragment extends Fragment {
          */
         @JavascriptInterface
         public void hideLoadingDialog() { handler.post(LoadingDialogFragment::hide); }
+
+        /**
+         * Displays a potentially cancellable error dialog with a specified title and message.
+         * This method is exposed to JavaScript and can be called from the WebView to show
+         * native error dialogs to the user. The dialog is shown on the main UI thread.
+         *
+         * @param title   The title of the error dialog.
+         * @param message The main message content of the error dialog.
+         * @param recoverable Whether or not the error dialog can be dismissed.
+         */
+        @JavascriptInterface
+        public void showErrorDialog(String title, String message, boolean recoverable) { handler.post(() -> ErrorDialogFragment.show(title, message, recoverable)); }
 
 
         /**
