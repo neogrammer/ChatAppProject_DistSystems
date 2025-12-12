@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import android.webkit.WebView;
 import android.widget.FrameLayout;
 
 import com.example.chatauth.R;
+import com.example.chatauth.fragment.error.ErrorDialogFragment;
 import com.example.chatauth.helpers.JSCallback;
 import com.google.protobuf.AbstractMessageLite;
 import com.google.protobuf.MessageLite;
@@ -66,7 +68,7 @@ public class ChatWebviewFragment extends Fragment /*implements IWebviewControlle
         if(args_obj == null) throw new RuntimeException("Can't construct chat webview without args!");
         if(args_obj.userId == null || args_obj.userId.isBlank()) throw new RuntimeException("Can't construct chat webview without userId!");
         if(args_obj.userName == null || args_obj.userName.isBlank()) throw new RuntimeException("Can't construct chat webview without userName!");
-        webview_owner.load(args_obj.userId, args_obj.userName, this);
+        if(versionCheckWebview()) webview_owner.load(args_obj.userId, args_obj.userName, this);
     }
 
     @Override
@@ -84,6 +86,32 @@ public class ChatWebviewFragment extends Fragment /*implements IWebviewControlle
             if(old_parent != null) ((ViewGroup) old_parent).removeView(webview);
             ((ViewGroup)view).addView(webview);
         });
+    }
+
+    private boolean versionCheckWebview() {
+        final var pack = WebView.getCurrentWebViewPackage();
+        if(pack == null) {
+            ErrorDialogFragment.show("WebView version check failed", "WebView Chrome version is unknown, but the app requires the latest version! Update your WebView system component to the latest version.", false);
+            return false;
+        }
+        final var version = pack.versionName;
+        final var parts = version.split("\\.");
+        if(parts.length == 0) {
+            ErrorDialogFragment.show("WebView version check failed", "WebView Chrome version is unknown, but the app requires the latest version! Update your WebView system component to the latest version. Current Version: " + version, false);
+            return false;
+        }
+        try {
+            final var major = Integer.parseInt(parts[0]);
+            if (major < 125) {
+                ErrorDialogFragment.show("WebView version check failed", "WebView Chrome version is " + major + ", but the app requires at least version 125! Update your WebView system component to the latest version. Current Version: " + version, false);
+                return false;
+            }
+        } catch(NumberFormatException e) {
+            ErrorDialogFragment.show("WebView version check failed", "WebView Chrome version is unknown, but the app requires the latest version! Update your WebView system component to the latest version. Current Version: " + version, false);
+            return false;
+        }
+        Log.d("ChatWebviewFragment", "Using chromium version " + version);
+        return true;
     }
 
     /**
