@@ -124,7 +124,7 @@ public class ChatWebviewOwnerFragment extends Fragment {
         }, controller);
         webview.addJavascriptInterface(bridge, "AndroidBridge");
         webview.loadUrl("https://appassets.androidplatform.net/assets/index.html");
-        //todo fail if chromium < 125.0
+        //fail if chromium < 125.0
         Log.d("ChatWebviewOwnerFragment", "Using chromium version " + WebView.getCurrentWebViewPackage().versionName);
     }
 
@@ -163,7 +163,7 @@ public class ChatWebviewOwnerFragment extends Fragment {
      * @param callback The {@link WithWebviewCallback} to be executed with the loaded WebView.
      */ // executes callback on the ui thread with the webview after its done loading
     public void withLoadedWebview(WithWebviewCallback callback) {
-        if(bridge.getLoaded()) bridge.handler.post(() -> callback.execute(webview));
+        if(bridge != null && bridge.getLoaded()) bridge.handler.post(() -> callback.execute(webview));
         else pending_wv_callbacks.add(callback);
     }
 
